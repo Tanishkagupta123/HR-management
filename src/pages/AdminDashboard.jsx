@@ -29,10 +29,14 @@ export default function AdminDashboard() {
 
   const submitTask = async () => {
     try {
-      await axios.post('http://localhost:8000/tasks', task);
-      alert("Task Submitted!");
+      console.log("Data sending to server:", task);
+      const res = await axios.post('http://localhost:8000/tasks', task);
+      alert("Task Submitted Successfully!");
       setTask({ ...task, client: '', title: '', date: '', hrs: '', mins: '', description: '' });
-    } catch (err) { alert("Error saving task."); }
+    } catch (err) {
+      console.error("Error details:", err.response?.data || err.message);
+      alert("Error saving task: " + (err.response?.data?.message || "Server Error"));
+    }
   };
 
   const addDepartment = () => {
@@ -89,8 +93,8 @@ export default function AdminDashboard() {
               <div><label className="block text-sm font-semibold mb-2">Date</label><input type="date" className="w-full p-4 border rounded-2xl" onChange={(e) => setTask({...task, date: e.target.value})} /></div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-              <div><label className="block text-sm font-semibold mb-2">Hours</label><input type="number" min="0" max="23" className="w-full p-4 border rounded-2xl" placeholder="0-23" onChange={(e) => setTask({...task, hrs: Math.min(23, Math.max(0, e.target.value))})} /></div>
-              <div><label className="block text-sm font-semibold mb-2">Minutes</label><input type="number" min="0" max="59" className="w-full p-4 border rounded-2xl" placeholder="0-59" onChange={(e) => setTask({...task, mins: Math.min(59, Math.max(0, e.target.value))})} /></div>
+              <div><label className="block text-sm font-semibold mb-2">Hours</label><input type="number" min="0" max="23" className="w-full p-4 border rounded-2xl" placeholder="0-23" onChange={(e) => setTask({...task, hrs: e.target.value})} /></div>
+              <div><label className="block text-sm font-semibold mb-2">Minutes</label><input type="number" min="0" max="59" className="w-full p-4 border rounded-2xl" placeholder="0-59" onChange={(e) => setTask({...task, mins: e.target.value})} /></div>
               <div><label className="block text-sm font-semibold mb-2">Status</label><select className="w-full p-4 border rounded-2xl" onChange={(e) => setTask({...task, status: e.target.value})}><option>Pending</option><option>Completed</option></select></div>
               <div><label className="block text-sm font-semibold mb-2">Priority</label><select className="w-full p-4 border rounded-2xl" onChange={(e) => setTask({...task, priority: e.target.value})}><option>Normal</option><option>High</option></select></div>
             </div>
