@@ -1,11 +1,28 @@
 import React from 'react';
+import axios from 'axios';
 
-export default function DataOfTasks({ tasksList, onDelete }) {
-  // Date filtering logic
+export default function DataOfTasks({ tasksList, onDelete, refreshData }) {
   const today = new Date().toISOString().split('T')[0];
   
   const todayTasks = tasksList.filter(t => t.task_date === today);
-  const weeklyTasks = tasksList.filter(t => t.task_date !== today); // Simplified logic
+  const weeklyTasks = tasksList.filter(t => t.task_date !== today);
+
+  // Status aur Extra Time update karne ka logic
+  const handleUpdate = async (task, type) => {
+    let updatedData = { ...task };
+    
+    if (type === 'complete') {
+      updatedData.status = 'Completed';
+    } else if (type === 'extra') {
+      const extra = prompt("Enter Extra Time (in hours):", task.extra_time || 0);
+      if (extra) updatedData.extra_time = extra;
+    }
+
+    try {
+      await axios.put(`http://localhost:8000/tasks/${task.id}`, updatedData);
+      refreshData(); // UI refresh ho jayega
+    } catch (err) { alert("Update failed!"); }
+  };
 
   const TaskTable = ({ data, title }) => (
     <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8">
@@ -34,8 +51,8 @@ export default function DataOfTasks({ tasksList, onDelete }) {
               </td>
               <td className="py-4 text-sm text-slate-600">{task.extra_time || '0'} / {task.description}</td>
               <td className="py-4 flex gap-2">
-                <button className="bg-yellow-400 p-1.5 rounded text-white text-xs">✉️</button>
-                <button className="bg-green-500 p-1.5 rounded text-white text-xs">✅</button>
+                <button className="bg-yellow-400 p-1.5 rounded text-white text-xs" onClick={() => handleUpdate(task, 'extra')}>✉️</button>
+                <button className="bg-green-500 p-1.5 rounded text-white text-xs" onClick={() => handleUpdate(task, 'complete')}>✅</button>
                 <button className="bg-blue-500 p-1.5 rounded text-white text-xs">☁️</button>
                 <button onClick={() => onDelete(task.id)} className="bg-red-500 p-1.5 rounded text-white text-xs">🗑️</button>
               </td>
