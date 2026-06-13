@@ -7,7 +7,7 @@ import logo from '../assets/as group logo.jpeg';
 
 export default function AdminDashboard() {
   const [activePage, setActivePage] = useState('Add Employee');
-  const [isOpen, setIsOpen] = useState(false); // Mobile menu control
+  const [isOpen, setIsOpen] = useState(false); 
   const [tasksList, setTasksList] = useState([]);
   const [employeesList, setEmployeesList] = useState([]);
   const [tasks, setTasks] = useState([{ assign_to: '', dept: '', client_name: '', title: '', task_date: '', hours: 0, minutes: 0, status: 'Pending', priority: 'Normal', description: '' }]);
@@ -71,19 +71,17 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-slate-50">
+    <div className="flex flex-col md:flex-row h-screen bg-slate-50 overflow-hidden">
       
-      {/* Mobile Header (Hamburger Menu) */}
-      <div className="md:hidden p-4 bg-white flex justify-between items-center shadow-sm">
-        <h1 className="font-extrabold text-lg">AS GROUP</h1>
+      {/* Mobile Header */}
+      <div className="md:hidden p-4 bg-white flex justify-between items-center shadow-sm z-50">
+        <h1 className="font-extrabold text-lg text-violet-950">AS GROUP</h1>
         <button onClick={() => setIsOpen(!isOpen)} className="text-3xl text-violet-950">☰</button>
       </div>
 
       {/* Sidebar */}
-      <aside className={`${isOpen ? 'block' : 'hidden'} md:block w-full md:w-72 bg-white border-r border-slate-100 flex flex-col justify-between shadow-sm h-full`}>
+      <aside className={`${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 absolute md:relative w-72 bg-white border-r border-slate-100 flex flex-col justify-between shadow-xl md:shadow-sm h-full z-40 transition-transform duration-300`}>
         <div className="flex flex-col w-full">
-          
-          {/* Logo Bada aur Title Bold */}
           <div className="flex items-center gap-4 p-8 mb-6">
              <img src={logo} alt="Logo" className="w-16 h-16 object-contain rounded-xl" />
              <h1 className="font-extrabold text-2xl text-violet-950 tracking-tight">AS GROUP</h1>
@@ -111,7 +109,8 @@ export default function AdminDashboard() {
         </div>
       </aside>
       
-      <main className="flex-1 p-10 overflow-y-auto">
+      {/* Main Content */}
+      <main className="flex-1 p-4 md:p-10 overflow-y-auto">
         {activePage === 'Add Employee' ? (
           <AddEmployee employee={employee} setEmployee={setEmployee} handleOnboard={handleOnboard} departments={departments} addDepartment={() => { const d = prompt("Enter new department:"); if(d && !departments.includes(d)) setDepartments([...departments, d]); }} />
         ) : activePage === 'Add Task' ? (
