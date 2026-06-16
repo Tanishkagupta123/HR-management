@@ -1,71 +1,95 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export default function Attendance({ employeesList }) {
-  // Mock function to simulate attendance calculation
-  const getStatus = (time) => {
-    return time > "09:30" ? <span className="px-2 py-1 bg-red-100 text-red-600 text-[10px] font-black uppercase rounded-lg">Late</span> : <span className="px-2 py-1 bg-green-100 text-green-600 text-[10px] font-black uppercase rounded-lg">On-Time</span>;
+  const [records, setRecords] = useState({});
+
+  // Work Hour Calculation Function
+  const calculateWorkHours = (inTime, outTime) => {
+    if (!inTime || !outTime) return '--';
+    const [h1, m1] = inTime.split(':').map(Number);
+    const [h2, m2] = outTime.split(':').map(Number);
+    const totalMinutes = (h2 * 60 + m2) - (h1 * 60 + m1);
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return `${h}h ${m}m`;
+  };
+
+  const fetchAttendanceData = async () => {
+    try {
+      const res = await axios.get('http://localhost:8000/attendance/today');
+      setRecords(res.data);
+    } catch (err) {
+      console.error("Data sync error", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAttendanceData();
+    const interval = setInterval(fetchAttendanceData, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleAction = async (empId, type) => {
+    try {
+      await axios.post('http://localhost:8000/attendance/mark', { empId, type, mode: 'Manual' });
+      alert(`${type} Success!`);
+      fetchAttendanceData();
+    } catch (err) {
+      alert("API Error");
+    }
   };
 
   return (
-    <div className="space-y-6">
-      {/* 1. Header & Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard title="Total Present" value="24" color="text-green-600" />
-        <StatCard title="Late Entries" value="03" color="text-red-600" />
-        <StatCard title="Total Shift" value="Morning" color="text-violet-600" />
-        <StatCard title="GPS Status" value="Active" color="text-blue-600" />
-      </div>
-
-      {/* 2. Main Attendance Controls */}
-      <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-6 items-center justify-between mb-8">
-            <div className="flex gap-4">
-                <button className="bg-green-600 hover:bg-green-700 text-white px-10 py-4 rounded-2xl font-black transition">Check-In</button>
-                <button className="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-black transition">Check-Out</button>
-            </div>
-            <label className="flex items-center gap-3 bg-slate-50 px-6 py-4 rounded-2xl cursor-pointer">
-                <input type="checkbox" className="w-5 h-5 accent-violet-900" />
-                <span className="font-bold text-slate-600">Manual Entry (Biometric Issue)</span>
-            </label>
-        </div>
-
-        {/* 3. Professional Attendance Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="text-slate-400 text-[10px] uppercase tracking-widest border-b border-slate-100">
-                <th className="pb-4">Employee</th>
-                <th className="pb-4">Shift</th>
-                <th className="pb-4">Check-In</th>
-                <th className="pb-4">Status</th>
-                <th className="pb-4">Work Hours</th>
-                <th className="pb-4">Location</th>
+    <div className="bg-white p-8 rounded-3xl border shadow-sm">
+      <table className="w-full text-left">
+        <thead>
+          <tr className="text-slate-400 text-[10px] uppercase border-b border-slate-100">
+            <th className="pb-4">Employee</th>
+            <th className="pb-4">Shift</th>
+            <th className="pb-4">Check-In</th>
+            <th className="pb-4">Check-Out</th>
+            <th className="pb-4">Work Hours</th>
+            <th className="pb-4">Status</th>
+            <th className="pb-4">Mode</th>
+            <th className="pb-4">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {employeesList.map((emp) => {
+            const rec = records[emp.id] || {};
+            const hours = rec.checkIn && rec.checkOut ? calculateWorkHours(rec.checkIn, rec.checkOut) : '--';
+            
+            return (
+              <tr key={emp.id} className="border-b border-slate-50">
+                <td className="py-5 font-bold">{emp.name}</td>
+                <td className="py-5 text-xs font-black uppercase text-violet-600">{emp.shift || 'MORNING'}</td>
+                <td className="py-5 font-mono">{rec.checkIn || '--:--'}</td>
+                <td className="py-5 font-mono">{rec.checkOut || '--:--'}</td>
+                <td className="py-5 font-bold text-violet-600">{hours}</td>
+                <td className="py-5">
+                  <span className={`px-2 py-1 rounded text-[10px] font-black ${rec.status === 'LATE' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                    {rec.status || 'PENDING'}
+                  </span>
+                </td>
+                <td className="py-5 text-xs font-bold text-slate-500">
+                  {rec.mode || 'Waiting...'}
+                </td>
+                <td className="py-5 flex gap-2">
+                  {/* LOCKING LOGIC: Agar Biometric se hua hai toh manual buttons disable */}
+                  {rec.mode === 'Biometric' ? (
+                    <span className="text-[10px] text-green-600 font-black">LOCKED (BIO)</span>
+                  ) : !rec.checkIn ? (
+                    <button onClick={() => handleAction(emp.id, 'CHECK-IN')} className="bg-blue-600 text-white px-2 py-1 rounded text-[9px] font-black">IN</button>
+                  ) : !rec.checkOut ? (
+                    <button onClick={() => handleAction(emp.id, 'CHECK-OUT')} className="bg-orange-600 text-white px-2 py-1 rounded text-[9px] font-black">OUT</button>
+                  ) : <span className="text-[10px] text-slate-400 font-bold">DONE</span>}
+                </td>
               </tr>
-            </thead>
-            <tbody className="text-sm font-medium text-slate-700">
-              {employeesList.map((emp) => (
-                <tr key={emp.id} className="border-b border-slate-50 hover:bg-slate-50 transition">
-                  <td className="py-5 font-bold text-slate-900">{emp.name}</td>
-                  <td className="py-5 text-xs text-slate-500 font-bold uppercase">{emp.shift || 'Morning'}</td>
-                  <td className="py-5 font-mono">09:15 AM</td>
-                  <td className="py-5">{getStatus("09:15")}</td>
-                  <td className="py-5 font-mono">06h 45m</td>
-                  <td className="py-5 text-xs text-slate-400">Office - Zone A</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
-}
-
-function StatCard({ title, value, color }) {
-    return (
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{title}</p>
-            <h3 className={`text-2xl font-black ${color}`}>{value}</h3>
-        </div>
-    );
 }
