@@ -15,6 +15,7 @@ export default function LeaveManagement() {
     { date: 'OCT 02', name: 'Gandhi Jayanti' }
   ];
 
+  
   useEffect(() => {
     // API call for pending requests
     setLeaves([
