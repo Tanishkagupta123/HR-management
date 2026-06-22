@@ -4,7 +4,8 @@ import AddEmployee from './AddEmployee';
 import AddTask from './AddTask';
 import DataOfTasks from './DataOfTasks';
 import AllEmployees from './AllEmployees';
-import Attendance from './Attendance'; // 1. Import add kiya
+import Attendance from './Attendance';
+import LeaveManagement from './LeaveManagement'; // Naya module add kiya
 import logo from '../assets/as group logo.jpeg'; 
 
 export default function AdminDashboard() {
@@ -14,11 +15,7 @@ export default function AdminDashboard() {
   const [employeesList, setEmployeesList] = useState([]);
   
   const [tasks, setTasks] = useState([{ assign_to: '', dept: '', client_name: '', title: '', task_date: '', hours: 0, minutes: 0, status: 'Pending', priority: 'Normal', description: '' }]);
-  
-  const [employee, setEmployee] = useState({ 
-    name: '', password: '', department: '', position: 'Employee', 
-    email: '', phone: '', designation: '', joining_date: '' 
-  });
+  const [employee, setEmployee] = useState({ name: '', password: '', department: '', position: 'Employee', email: '', phone: '', designation: '', joining_date: '' });
   
   const [departments, setDepartments] = useState(() => {
     const saved = localStorage.getItem('companyDepartments');
@@ -50,16 +47,12 @@ export default function AdminDashboard() {
       alert("Please Name, Email, aur Department zaroor bharein!");
       return;
     }
-    
     try {
       await axios.post('http://localhost:8000/employees', employee);
       alert("Employee Successfully Onboarded!");
       setEmployee({ name: '', password: '', department: '', position: 'Employee', email: '', phone: '', designation: '', joining_date: '' });
       fetchData();
-    } catch (err) {
-      console.error("Backend Error:", err);
-      alert("Error! Check console.");
-    }
+    } catch (err) { alert("Error! Check console."); }
   };
 
   const handleTaskChange = (i, field, val) => {
@@ -78,10 +71,7 @@ export default function AdminDashboard() {
       alert("Tasks Successfully Submitted!");
       setTasks([{ assign_to: '', dept: '', client_name: '', title: '', task_date: '', hours: 0, minutes: 0, status: 'Pending', priority: 'Normal', description: '' }]);
       fetchData();
-    } catch (err) {
-      console.error("Backend Error:", err);
-      alert("Submit nahi hua! Console check karein.");
-    }
+    } catch (err) { alert("Submit nahi hua!"); }
   };
 
   return (
@@ -98,8 +88,8 @@ export default function AdminDashboard() {
              <h1 className="font-extrabold text-2xl text-violet-950 tracking-tight">AS GROUP</h1>
           </div>
           <div className="flex flex-col w-full px-4 gap-2">
-            {/* 2. Menu list mein 'Attendance' add kiya */}
-            {['Add Employee', 'All Employees', 'Attendance', 'Add Task', 'Data of Tasks'].map(item => (
+            {/* Yahan 'Leave Management' menu mein add kar diya hai */}
+            {['Add Employee', 'All Employees', 'Attendance', 'Leave Management', 'Add Task', 'Data of Tasks'].map(item => (
               <div key={item} onClick={() => { setActivePage(item); setIsOpen(false); }} className={`w-full px-6 py-4 cursor-pointer rounded-xl font-bold transition-all duration-200 text-lg ${activePage === item ? 'bg-violet-900 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100 hover:text-violet-900'}`}>
                 {item}
               </div>
@@ -112,13 +102,15 @@ export default function AdminDashboard() {
       </aside>
       
       <main className="flex-1 p-4 md:p-10 overflow-y-auto">
-        {/* 3. Render logic mein Attendance page add kiya */}
+        {/* Render logic mein 'Leave Management' condition add kar di hai */}
         {activePage === 'Add Employee' ? (
           <AddEmployee employee={employee} setEmployee={setEmployee} handleOnboard={handleOnboard} departments={departments} addDepartment={() => { const d = prompt("Enter new department:"); if(d && !departments.includes(d)) setDepartments([...departments, d]); }} />
         ) : activePage === 'All Employees' ? (
           <AllEmployees employeesList={employeesList} />
         ) : activePage === 'Attendance' ? (
           <Attendance employeesList={employeesList} />
+        ) : activePage === 'Leave Management' ? (
+          <LeaveManagement />
         ) : activePage === 'Add Task' ? (
           <AddTask tasks={tasks} handleTaskChange={handleTaskChange} submitAllTasks={submitAllTasks} employeesList={employeesList} departments={departments} addNewTaskBlock={() => setTasks([...tasks, { assign_to: '', dept: '', client_name: '', title: '', task_date: '', hours: 0, minutes: 0, status: 'Pending', priority: 'Normal', description: '' }])} removeTaskBlock={(i) => setTasks(tasks.filter((_, idx) => idx !== i))} />
         ) : (
@@ -127,4 +119,4 @@ export default function AdminDashboard() {
       </main>
     </div>
   );
-}   
+}
