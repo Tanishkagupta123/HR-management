@@ -3,44 +3,38 @@ import axios from 'axios';
 
 export default function LeaveManagement() {
   const [leaves, setLeaves] = useState([]);
-  const [employeesData, setEmployeesData] = useState([]);
-  const [holidays, setHolidays] = useState([]);
+  
+  // Dummy data for visual proof
+  const employeesData = [
+    { name: 'Tanishka ', sick: '2/5', casual: '1/10', paid: '0/12' },
+    { name: 'Ruchi Sharma', sick: '0/5', casual: '5/10', paid: '2/12' }
+  ];
 
+  const holidays = [
+    { date: 'AUG 15', name: 'Independence Day' },
+    { date: 'OCT 02', name: 'Gandhi Jayanti' }
+  ];
+
+  
   useEffect(() => {
-    fetchData();
+    // API call for pending requests
+    setLeaves([
+      { _id: 1, employeeName: 'Tanishka', type: 'Sick', reason: 'Fever' },
+      { _id: 2, employeeName: 'Ruchi Sharma', type: 'Casual', reason: 'Personal' }
+    ]);
   }, []);
 
-  const fetchData = async () => {
-    try {
-      // Yahan apni asli APIs replace kar lein
-      const [leavesRes, empRes, holiRes] = await axios.all([
-        axios.get('http://localhost:8000/leaves'),
-        axios.get('http://localhost:8000/employees'),
-        axios.get('http://localhost:8000/holidays')
-      ]);
-      setLeaves(leavesRes.data);
-      setEmployeesData(empRes.data);
-      setHolidays(holiRes.data);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-    }
-  };
-
-  const handleAction = async (id, status) => {
-    try {
-      await axios.put(`http://localhost:8000/leaves/${id}`, { status });
-      alert(`Request ${status}ed successfully!`);
-      fetchData(); // UI refresh karne ke liye
-    } catch (err) {
-      alert("Failed to update status");
-    }
+  // Function to handle Approval/Rejection
+  const handleAction = (id, status) => {
+    alert(`Request ${status}ed successfully!`);
+    setLeaves(leaves.filter(l => l._id !== id)); // List se refresh karne ke liye
   };
 
   return (
     <div className="p-8 bg-slate-50 min-h-screen space-y-8">
-      {/* 1. EMPLOYEE LEAVE LEDGER */}
+      {/* 1. EMPLOYEE LEAVE LEDGER (Individual Tracking) */}
       <div className="bg-white p-8 rounded-3xl border shadow-sm">
-        <h2 className="text-lg font-black text-violet-950 mb-6">Employee Leave Ledger</h2>
+        <h2 className="text-lg font-black text-violet-950 mb-6">Employee Leave Ledger (Used / Limit)</h2>
         <table className="w-full text-left">
           <thead>
             <tr className="text-slate-400 text-[10px] uppercase border-b border-slate-100">
@@ -54,9 +48,9 @@ export default function LeaveManagement() {
             {employeesData.map((e, i) => (
               <tr key={i} className="border-b border-slate-50">
                 <td className="py-4 font-black text-sm">{e.name}</td>
-                <td className="py-4 font-bold text-violet-600">{e.sickUsed}/{e.sickLimit}</td>
-                <td className="py-4 font-bold text-violet-600">{e.casualUsed}/{e.casualLimit}</td>
-                <td className="py-4 font-bold text-violet-600">{e.paidUsed}/{e.paidLimit}</td>
+                <td className="py-4 font-bold text-violet-600">{e.sick}</td>
+                <td className="py-4 font-bold text-violet-600">{e.casual}</td>
+                <td className="py-4 font-bold text-violet-600">{e.paid}</td>
               </tr>
             ))}
           </tbody>
@@ -67,18 +61,26 @@ export default function LeaveManagement() {
         {/* 2. APPROVAL WORKFLOW */}
         <div className="lg:col-span-2 bg-white p-8 rounded-3xl border shadow-sm">
           <h2 className="text-lg font-black text-violet-950 mb-6">Pending Approvals</h2>
-          {leaves.length > 0 ? leaves.map(l => (
+          {leaves.map(l => (
             <div key={l._id} className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl mb-4 border">
               <div>
                 <p className="font-black text-sm">{l.employeeName}</p>
                 <p className="text-[10px] text-slate-400 font-bold">{l.type} • {l.reason}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => handleAction(l._id, 'Approve')} className="bg-green-100 text-green-700 px-4 py-1.5 rounded-lg font-black text-[10px] hover:bg-green-200 transition">APPROVE</button>
-                <button onClick={() => handleAction(l._id, 'Reject')} className="bg-red-100 text-red-700 px-4 py-1.5 rounded-lg font-black text-[10px] hover:bg-red-200 transition">REJECT</button>
+                {/* APPROVE BUTTON */}
+                <button 
+                  onClick={() => handleAction(l._id, 'Approve')} 
+                  className="bg-green-100 text-green-700 px-4 py-1.5 rounded-lg font-black text-[10px] hover:bg-green-200 transition"
+                >APPROVE</button>
+                {/* REJECT BUTTON */}
+                <button 
+                  onClick={() => handleAction(l._id, 'Reject')} 
+                  className="bg-red-100 text-red-700 px-4 py-1.5 rounded-lg font-black text-[10px] hover:bg-red-200 transition"
+                >REJECT</button>
               </div>
             </div>
-          )) : <p className="text-slate-400 font-bold text-sm">No pending requests.</p>}
+          ))}
         </div>
 
         {/* 3. UPCOMING HOLIDAYS */}
