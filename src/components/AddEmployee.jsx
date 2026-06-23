@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 
 export default function AddEmployee() {
-  // Outlet se zaroori data aur functions nikaal liye
   const { employee, setEmployee, handleOnboard, departments, addDepartment } = useOutletContext();
   
   const [preview, setPreview] = useState(null);
@@ -60,12 +59,23 @@ export default function AddEmployee() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="flex flex-col">
             <label className="block text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-wider">Department</label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <select className="flex-1 p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-violet-500 transition" value={employee.department || ''} onChange={(e) => updateField('department', e.target.value)}>
                 <option value="" disabled>Select Dept</option>
                 {departments && departments.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
-              <button onClick={addDepartment} className="bg-slate-900 text-white px-5 rounded-2xl font-black text-xl hover:bg-violet-700 transition">+</button>
+              
+              {/* FIXED BUTTON: Added explicit positioning and event handling */}
+              <button 
+                type="button" 
+                onClick={(e) => { 
+                    e.preventDefault();
+                    if (addDepartment) addDepartment(); 
+                }} 
+                className="bg-slate-900 text-white px-6 py-4 rounded-2xl font-black text-xl hover:bg-violet-700 transition relative z-20 cursor-pointer"
+              >
+                +
+              </button>
             </div>
           </div>
           <Input label="Designation" placeholder="e.g. Senior Developer" value={employee.designation || ''} onChange={(v) => updateField('designation', v)} />
@@ -103,7 +113,6 @@ export default function AddEmployee() {
   );
 }
 
-// Reusable Components
 function Input({ label, type = "text", placeholder, value, onChange, disabled, className = "" }) {
   return (
     <div className="flex flex-col">

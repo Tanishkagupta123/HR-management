@@ -6,7 +6,6 @@ import logo from '../assets/as group logo.jpeg';
 export default function AdminDashboard() {
   const location = useLocation();
 
-  // Yahan wahi saari states hain jo aapke purane code mein thin
   const [tasksList, setTasksList] = useState([]);
   const [employeesList, setEmployeesList] = useState([]);
   const [tasks, setTasks] = useState([{ assign_to: '', dept: '', client_name: '', title: '', task_date: '', hours: 0, minutes: 0, status: 'Pending', priority: 'Normal', description: '' }]);
@@ -25,6 +24,16 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  // YAHI FUNCTION MISSING THA:
+  const addDepartment = () => {
+    const newDept = prompt("Enter new department name:");
+    if (newDept && !departments.includes(newDept)) {
+        setDepartments([...departments, newDept]);
+    } else if (departments.includes(newDept)) {
+        alert("This department already exists!");
+    }
+  };
 
   const handleOnboard = async () => {
     if (!employee.name.trim() || !employee.email.trim() || !employee.department) {
@@ -84,9 +93,9 @@ export default function AdminDashboard() {
       </aside>
 
       <main className="flex-1 p-10 overflow-y-auto">
-        {/* Yahan saara data hum "context" mein bhej rahe hain */}
-        <Outlet context={{ tasksList, employeesList, tasks, setTasks, employee, setEmployee, departments, setDepartments, fetchData, handleOnboard, handleTaskChange, submitAllTasks }} /> 
+        {/* Yahan addDepartment ko context mein pass kar diya gaya hai */}
+        <Outlet context={{ tasksList, employeesList, tasks, setTasks, employee, setEmployee, departments, setDepartments, addDepartment, fetchData, handleOnboard, handleTaskChange, submitAllTasks }} /> 
       </main>
     </div>
   );
-}
+} 
