@@ -1,7 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useOutletContext } from 'react-router-dom';
 
-export default function DataOfTasks({ tasksList, onDelete, refreshData }) {
+export default function DataOfTasks() {
+  // Outlet context se data aur functions nikaal liye
+  const { tasksList, fetchData } = useOutletContext();
+  
+  // onDelete function ko context ke through ya direct access karna
+  const onDelete = async (id) => { 
+    await axios.delete(`http://localhost:8000/tasks/${id}`); 
+    fetchData(); 
+  };
+
   const today = new Date().toISOString().split('T')[0];
   const todayTasks = tasksList.filter(t => t.task_date === today);
   const weeklyTasks = tasksList.filter(t => t.task_date !== today);
@@ -55,7 +65,7 @@ export default function DataOfTasks({ tasksList, onDelete, refreshData }) {
     }
     try {
       await axios.put(`http://localhost:8000/tasks/${task.id}`, updatedData);
-      refreshData();
+      fetchData();
     } catch (err) { alert("Update failed!"); }
   };
 
@@ -154,24 +164,10 @@ export default function DataOfTasks({ tasksList, onDelete, refreshData }) {
 
                     {/* Action Buttons */}
                     <div className="flex gap-1.5 justify-center">
-                      <button
-                        title="Info"
-                        className="w-8 h-8 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-white text-sm border-none cursor-pointer flex items-center justify-center transition"
-                      >✉</button>
-                      <button
-                        onClick={() => handleUpdate(task, 'complete')}
-                        title="Complete"
-                        className="w-8 h-8 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm border-none cursor-pointer flex items-center justify-center transition"
-                      >✓</button>
-                      <button
-                        title="Upload"
-                        className="w-8 h-8 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm border-none cursor-pointer flex items-center justify-center transition"
-                      >↑</button>
-                      <button
-                        onClick={() => onDelete(task.id)}
-                        title="Delete"
-                        className="w-8 h-8 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm border-none cursor-pointer flex items-center justify-center transition"
-                      >🗑</button>
+                      <button title="Info" className="w-8 h-8 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-white text-sm border-none cursor-pointer flex items-center justify-center transition">✉</button>
+                      <button onClick={() => handleUpdate(task, 'complete')} title="Complete" className="w-8 h-8 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm border-none cursor-pointer flex items-center justify-center transition">✓</button>
+                      <button title="Upload" className="w-8 h-8 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm border-none cursor-pointer flex items-center justify-center transition">↑</button>
+                      <button onClick={() => onDelete(task.id)} title="Delete" className="w-8 h-8 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm border-none cursor-pointer flex items-center justify-center transition">🗑</button>
                     </div>
 
                   </div>

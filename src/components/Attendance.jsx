@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useOutletContext } from 'react-router-dom';
 
-export default function Attendance({ employeesList }) {
+export default function Attendance() {
+  // Outlet se employeesList nikaal liya
+  const { employeesList } = useOutletContext();
   const [records, setRecords] = useState({});
 
   // Work Hour Calculation Function
@@ -76,7 +79,6 @@ export default function Attendance({ employeesList }) {
                   {rec.mode || 'Waiting...'}
                 </td>
                 <td className="py-5 flex gap-2">
-                  {/* LOCKING LOGIC: Agar Biometric se hua hai toh manual buttons disable */}
                   {rec.mode === 'Biometric' ? (
                     <span className="text-[10px] text-green-600 font-black">LOCKED (BIO)</span>
                   ) : !rec.checkIn ? (

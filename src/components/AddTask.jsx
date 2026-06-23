@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 
-export default function AddTask({ tasks, handleTaskChange, addNewTaskBlock, submitAllTasks, employeesList, departments, removeTaskBlock }) {
+export default function AddTask() {
+  // Outlet se zaroori data aur functions nikaal liye
+  const { tasks, handleTaskChange, addNewTaskBlock, submitAllTasks, employeesList, departments, removeTaskBlock } = useOutletContext();
+  
   const [dateTime, setDateTime] = useState(new Date());
 
   useEffect(() => {

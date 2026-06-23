@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 
-export default function AddEmployee({ employee, setEmployee, handleOnboard, departments, addDepartment }) {
+export default function AddEmployee() {
+  // Outlet se zaroori data aur functions nikaal liye
+  const { employee, setEmployee, handleOnboard, departments, addDepartment } = useOutletContext();
+  
   const [preview, setPreview] = useState(null);
 
   const updateField = (field, value) => setEmployee({...employee, [field]: value});
@@ -79,7 +83,7 @@ export default function AddEmployee({ employee, setEmployee, handleOnboard, depa
       <div className="bg-slate-50 p-8 rounded-3xl mb-10 border border-slate-200">
         <h3 className="text-[11px] font-black text-slate-900 mb-8 uppercase tracking-[0.2em]">Required Identity Documents</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           {['Aadhaar Card', 'PAN Card', 'Certificates'].map((doc) => (
+           {['[Aadhaar Redacted]', 'PAN Card', 'Certificates'].map((doc) => (
              <div key={doc} className="bg-white p-6 rounded-2xl border-2 border-dashed border-slate-200 hover:border-violet-400 transition-all">
                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase">{doc}</label>
                <input type="file" className="w-full text-[10px] text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 cursor-pointer" />
@@ -119,4 +123,3 @@ function Select({ label, value, onChange, options }) {
     </div>
   );
 }
-
