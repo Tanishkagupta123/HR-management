@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
+import EmployeeDashboard from './pages/EmployeeDashboard';
 import AddEmployee from './components/AddEmployee';
 import AllEmployees from './components/AllEmployees';
 import Attendance from './components/Attendance';
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="add-task" element={<AddTask />} />
           <Route path="data-tasks" element={<DataOfTasks />} />
         </Route>
+        <Route path="/dashboard" element={<EmployeeDashboard />} />
       </Routes>
     </BrowserRouter>
   );

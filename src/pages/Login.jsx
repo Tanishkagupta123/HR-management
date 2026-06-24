@@ -11,7 +11,11 @@ export default function Login() {
     try {
       const res = await axios.post('http://localhost:8000/admin/login', auth);
       if (res.data.success) {
-        navigate('/admin');
+        const role = res.data.user?.role || 'employee';
+        // save user info for later
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        if (role === 'admin') navigate('/admin');
+        else navigate('/dashboard');
       }
     } catch (err) {
       alert("Login Failed: " + (err.response?.data?.message || "Server Error"));

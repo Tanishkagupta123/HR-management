@@ -1,10 +1,11 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'; // useNavigate import kiya
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import logo from '../assets/as group logo.jpeg';
 
 export default function AdminDashboard() {
   const location = useLocation();
+  const navigate = useNavigate(); // Logout navigate ke liye
 
   const [tasksList, setTasksList] = useState([]);
   const [employeesList, setEmployeesList] = useState([]);
@@ -25,7 +26,6 @@ export default function AdminDashboard() {
 
   useEffect(() => { fetchData(); }, []);
 
-  // YAHI FUNCTION MISSING THA:
   const addDepartment = () => {
     const newDept = prompt("Enter new department name:");
     if (newDept && !departments.includes(newDept)) {
@@ -33,6 +33,11 @@ export default function AdminDashboard() {
     } else if (departments.includes(newDept)) {
         alert("This department already exists!");
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('loggedInUser'); // Agar aapne local storage mein user save kiya hai
+    navigate('/'); // Login page par bhej dega
   };
 
   const handleOnboard = async () => {
@@ -78,24 +83,32 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <aside className="w-72 bg-white border-r shadow-sm flex flex-col">
-        <div className="flex items-center gap-4 p-8">
-           <img src={logo} alt="Logo" className="w-16 h-16 object-contain rounded-xl" />
-           <h1 className="font-extrabold text-2xl text-violet-950 tracking-tight">AS GROUP</h1>
+      <aside className="w-72 bg-white border-r shadow-sm flex flex-col justify-between">
+        <div>
+            <div className="flex items-center gap-4 p-8">
+               <img src={logo} alt="Logo" className="w-16 h-16 object-contain rounded-xl" />
+               <h1 className="font-extrabold text-2xl text-violet-950 tracking-tight">AS GROUP</h1>
+            </div>
+            <nav className="flex flex-col px-4 gap-2">
+              {menuItems.map(item => (
+                <Link key={item.path} to={item.path} className={`px-6 py-4 rounded-xl font-bold transition ${location.pathname === item.path ? 'bg-violet-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
         </div>
-        <nav className="flex flex-col px-4 gap-2">
-          {menuItems.map(item => (
-            <Link key={item.path} to={item.path} className={`px-6 py-4 rounded-xl font-bold transition ${location.pathname === item.path ? 'bg-violet-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
-              {item.name}
-            </Link>
-          ))}
-        </nav>
+
+        {/* LOGOUT BUTTON */}
+        <div className="p-4">
+            <button onClick={handleLogout} className="w-full px-6 py-4 rounded-xl font-bold text-red-600 hover:bg-red-50 transition border border-red-100">
+                Logout
+            </button>
+        </div>
       </aside>
 
       <main className="flex-1 p-10 overflow-y-auto">
-        {/* Yahan addDepartment ko context mein pass kar diya gaya hai */}
         <Outlet context={{ tasksList, employeesList, tasks, setTasks, employee, setEmployee, departments, setDepartments, addDepartment, fetchData, handleOnboard, handleTaskChange, submitAllTasks }} /> 
       </main>
     </div>
   );
-} 
+}
