@@ -4,42 +4,49 @@ import axios from 'axios';
 
 export default function Login() {
   const [auth, setAuth] = useState({ name: '', password: '' });
+  const [errorMessage, setErrorMessage] = useState(''); // 1. Message state add kiya
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMessage(''); // Har naye attempt par message clear kar do
+
     try {
       const res = await axios.post('http://localhost:8000/admin/login', auth);
       if (res.data.success) {
         const role = res.data.user?.role || 'employee';
-        // save user info for later
         localStorage.setItem('user', JSON.stringify(res.data.user));
         if (role === 'admin') navigate('/admin');
         else navigate('/dashboard');
+      } else {
+        setErrorMessage(res.data.message); // 2. Error aane par message dikhao
       }
     } catch (err) {
-      alert("Login Failed: " + (err.response?.data?.message || "Server Error"));
+      setErrorMessage("Server Error, please try again.");
     }
   };
 
   return (
-    // Yahan style attribute mein background image daal di hai
     <div 
       className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center"
       style={{ backgroundImage: "url('https://images.unsplash.com/photo-1618220179428-22790b461013?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')" }}
     >
-      {/* Glassmorphism Card */}
       <div className="w-full max-w-md bg-white/10 backdrop-blur-xl p-10 rounded-[40px] shadow-2xl border border-white/20">
         
-        {/* Logo Section */}
         <div className="text-center mb-8">
           <img src="/src/assets/as group logo.jpeg" className="w-20 h-20 mx-auto object-contain rounded-full border-2 border-white/30" />
           <h1 className="text-3xl font-extrabold text-white mt-4 tracking-wide">AS GROUP</h1>
           <p className="text-white/70 font-medium">Secure Sign-In</p>
         </div>
 
-        {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-6">
+          {/* 3. Yahan error message dikhega */}
+          {errorMessage && (
+            <div className="bg-red-500/20 border border-red-500/50 text-white text-center py-2 rounded-xl text-sm">
+              {errorMessage}
+            </div>
+          )}
+
           <div>
             <label className="block text-white text-sm font-semibold mb-2">Employee Name</label>
             <input 
@@ -63,13 +70,6 @@ export default function Login() {
             Sign In
           </button>
         </form>
-
-        <div className="text-center mt-6 space-y-2">
-          <p className="text-white/70 text-sm cursor-pointer hover:text-white">Forgot Password?</p>
-          <p className="text-white/90 text-sm">
-            Don't have an account? <span className="font-bold cursor-pointer underline hover:text-violet-300">Sign up</span>
-          </p>
-        </div>
       </div>
     </div>
   );
