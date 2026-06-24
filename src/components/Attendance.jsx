@@ -3,11 +3,9 @@ import axios from 'axios';
 import { useOutletContext } from 'react-router-dom';
 
 export default function Attendance() {
-  // Outlet se employeesList nikaal liya
   const { employeesList } = useOutletContext();
   const [records, setRecords] = useState({});
 
-  // Work Hour Calculation Function
   const calculateWorkHours = (inTime, outTime) => {
     if (!inTime || !outTime) return '--';
     const [h1, m1] = inTime.split(':').map(Number);
@@ -79,8 +77,9 @@ export default function Attendance() {
                   {rec.mode || 'Waiting...'}
                 </td>
                 <td className="py-5 flex gap-2">
-                  {rec.mode === 'Biometric' ? (
-                    <span className="text-[10px] text-green-600 font-black">LOCKED (BIO)</span>
+                  {/* YAHAN LOCK LOGIC ADD KIYA HAI */}
+                  {(rec.mode === 'Biometric' || rec.mode === 'GPS') ? (
+                    <span className="text-[10px] text-green-600 font-black uppercase">LOCKED ({rec.mode})</span>
                   ) : !rec.checkIn ? (
                     <button onClick={() => handleAction(emp.id, 'CHECK-IN')} className="bg-blue-600 text-white px-2 py-1 rounded text-[9px] font-black">IN</button>
                   ) : !rec.checkOut ? (
