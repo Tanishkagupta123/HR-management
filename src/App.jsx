@@ -11,11 +11,14 @@ import Attendance from './components/Attendance';
 import LeaveManagement from './components/LeaveManagement';
 import AddTask from './components/AddTask';
 import DataOfTasks from './components/DataOfTasks';
+import AdminHiring from './pages/AdminHiring';
 
 // Employee Components
 import EmployeeProfile from './employee/EmployeeProfile';
 import EmployeeTasks from './employee/EmployeeTasks';
 import EmployeeLeave from './employee/EmployeeLeave';
+
+
 
 
 export default function App() {
@@ -34,6 +37,7 @@ export default function App() {
           <Route path="leave-management" element={<LeaveManagement />} />
           <Route path="add-task" element={<AddTask />} />
           <Route path="data-tasks" element={<DataOfTasks />} />
+          <Route path="hiring" element={<AdminHiring />} />
         </Route>
 
         {/* Employee Dashboard: Yahan nested routes ka use hoga */}

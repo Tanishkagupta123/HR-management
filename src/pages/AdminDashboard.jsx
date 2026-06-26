@@ -9,6 +9,7 @@ export default function AdminDashboard() {
 
   const [tasksList, setTasksList] = useState([]);
   const [employeesList, setEmployeesList] = useState([]);
+  const [hiringList, setHiringList] = useState([]);   
   const [tasks, setTasks] = useState([{ assign_to: '', dept: '', client_name: '', title: '', task_date: '', hours: 0, minutes: 0, status: 'Pending', priority: 'Normal', description: '' }]);
   const [employee, setEmployee] = useState({ name: '', password: '', department: '', position: 'Employee', email: '', phone: '', designation: '', joining_date: '' });
   const [departments, setDepartments] = useState(() => JSON.parse(localStorage.getItem('companyDepartments')) || ['IT', 'HR', 'Sales']);
@@ -21,6 +22,8 @@ export default function AdminDashboard() {
       const eRes = await axios.get('http://localhost:8000/employees');
       setTasksList(tRes.data);
       setEmployeesList(eRes.data);
+      const hRes = await axios.get('http://localhost:8000/hiring/all');
+setHiringList(hRes.data);
     } catch (err) { console.error("Error fetching data"); }
   };
 
@@ -81,7 +84,8 @@ export default function AdminDashboard() {
     { name: 'Attendance', path: '/admin/attendance' },
     { name: 'Leave Management', path: '/admin/leave-management' },
     { name: 'Add Task', path: '/admin/add-task' },
-    { name: 'Data of Tasks', path: '/admin/data-tasks' }
+    { name: 'Data of Tasks', path: '/admin/data-tasks' },
+    { name: 'Recruitment', path: '/admin/hiring' }
   ];
 
   return (
@@ -110,7 +114,7 @@ export default function AdminDashboard() {
       </aside>
 
       <main className="flex-1 p-10 overflow-y-auto">
-        <Outlet context={{ tasksList, employeesList, tasks, setTasks, employee, setEmployee, departments, setDepartments, addDepartment, fetchData, handleOnboard, handleTaskChange, submitAllTasks }} /> 
+        <Outlet context={{ tasksList, employeesList, tasks, setTasks, employee, setEmployee, departments, setDepartments, addDepartment, fetchData, handleOnboard, handleTaskChange, submitAllTasks,hiringList}} /> 
       </main>
     </div>
   );
