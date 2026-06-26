@@ -46,7 +46,10 @@ export default function AdminDashboard() {
       return;
     }
     try {
-      await axios.post('http://localhost:8000/employees', employee);
+      await axios.post('http://localhost:8000/employees', {
+        ...employee,
+        phone_number: employee.phone
+      });
       alert("Employee Successfully Onboarded!");
       setEmployee({ name: '', password: '', department: '', position: 'Employee', email: '', phone: '', designation: '', joining_date: '' });
       fetchData();

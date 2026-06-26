@@ -28,8 +28,9 @@ export default function LeaveManagement() {
 
   const handleAction = async (id, status) => {
     try {
-      await axios.put(`http://localhost:8000/leaves/${id}`, { status });
-      alert(`Request ${status}ed successfully!`);
+      const mappedStatus = status === 'Approve' ? 'Approved' : 'Rejected';
+      await axios.put(`http://localhost:8000/leaves/${id}`, { status: mappedStatus });
+      alert(`Request ${mappedStatus} successfully!`);
       fetchData(); // UI refresh karne ke liye
     } catch (err) {
       alert("Failed to update status");
@@ -70,12 +71,23 @@ export default function LeaveManagement() {
           {leaves.length > 0 ? leaves.map(l => (
             <div key={l._id} className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl mb-4 border">
               <div>
-                <p className="font-black text-sm">{l.employeeName}</p>
+                <div className="flex items-center gap-3 mb-2">
+                  <p className="font-black text-sm">{l.employeeName}</p>
+                  <span className={`text-[10px] font-black uppercase rounded-full px-3 py-1 ${l.status === 'Approved' ? 'bg-emerald-100 text-emerald-700' : l.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {l.status || 'Pending'}
+                  </span>
+                </div>
                 <p className="text-[10px] text-slate-400 font-bold">{l.type} • {l.reason}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => handleAction(l._id, 'Approve')} className="bg-green-100 text-green-700 px-4 py-1.5 rounded-lg font-black text-[10px] hover:bg-green-200 transition">APPROVE</button>
-                <button onClick={() => handleAction(l._id, 'Reject')} className="bg-red-100 text-red-700 px-4 py-1.5 rounded-lg font-black text-[10px] hover:bg-red-200 transition">REJECT</button>
+                {l.status === 'Pending' ? (
+                  <>
+                    <button onClick={() => handleAction(l._id, 'Approve')} className="bg-green-100 text-green-700 px-4 py-1.5 rounded-lg font-black text-[10px] hover:bg-green-200 transition">APPROVE</button>
+                    <button onClick={() => handleAction(l._id, 'Reject')} className="bg-red-100 text-red-700 px-4 py-1.5 rounded-lg font-black text-[10px] hover:bg-red-200 transition">REJECT</button>
+                  </>
+                ) : (
+                  <span className="text-[10px] font-black uppercase px-4 py-2 rounded-full bg-slate-100 text-slate-600">No actions available</span>
+                )}
               </div>
             </div>
           )) : <p className="text-slate-400 font-bold text-sm">No pending requests.</p>}

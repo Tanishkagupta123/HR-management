@@ -7,14 +7,27 @@ export default function EmployeeLeave() {
   const [history, setHistory] = useState([]);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+  const calculateBalance = (leaveHistory) => {
+    const result = { sickUsed: 0, sickLimit: 5, casualUsed: 0, casualLimit: 5, paidUsed: 0, paidLimit: 10 };
+    leaveHistory.forEach((item) => {
+      if (item.status === 'Approved') {
+        if (item.type === 'Sick') result.sickUsed += 1;
+        if (item.type === 'Casual') result.casualUsed += 1;
+        if (item.type === 'Paid') result.paidUsed += 1;
+      }
+    });
+    return result;
+  };
+
   const fetchData = async () => {
     try {
-      const balRes = await axios.get(`http://localhost:8000/employees/${user.id}`);
-      setBalance(balRes.data);
-      
       const histRes = await axios.get(`http://localhost:8000/leaves/employee/${user.id}`);
-      setHistory(histRes.data);
-    } catch (err) { console.error("Data fetch error"); }
+      const historyData = histRes.data || [];
+      setHistory(historyData);
+      setBalance(calculateBalance(historyData));
+    } catch (err) {
+      console.error("Data fetch error", err);
+    }
   };
 
   useEffect(() => {

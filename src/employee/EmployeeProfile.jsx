@@ -1,15 +1,43 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export default function EmployeeProfile() {
   const [user, setUser] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
-    setUser(loggedInUser);
+    const fetchUserProfile = async () => {
+      try {
+        const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (loggedInUser.id) {
+          const res = await axios.get(`http://localhost:8000/employees/${loggedInUser.id}`);
+          setUser({ ...loggedInUser, ...(res.data || {}) });
+        } else {
+          setUser(loggedInUser);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
+        setUser(loggedInUser);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserProfile();
   }, []);
 
   // Function to get initial letter
   const getInitial = (name) => name ? name.charAt(0).toUpperCase() : 'U';
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white p-10 rounded-[32px] shadow-sm border border-slate-100">
+          <p className="text-slate-400 font-bold">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -26,7 +54,7 @@ export default function EmployeeProfile() {
           </div>
           <div>
             <h2 className="text-3xl font-extrabold text-violet-950">{user.name || 'User'}</h2>
-            <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">{user.position}</p>
+            <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">{user.role_position || user.position || 'Employee'}</p>
           </div>
         </div>
         
@@ -34,11 +62,11 @@ export default function EmployeeProfile() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
           {[
             { label: 'Email Address', value: user.email },
-            { label: 'Phone Number', value: user.phone },
+            { label: 'Phone Number', value: user.phone_number || user.phone },
             { label: 'Department', value: user.department },
-            { label: 'Designation', value: user.designation },
+            { label: 'Designation', value: user.role_position || user.position },
             { label: 'Joining Date', value: user.joining_date },
-            { label: 'Employee ID', value: user.id }
+            { label: 'Employee ID', value: user.employee_code || user.id }
           ].map((item, idx) => (
             <div key={idx} className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
               <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">{item.label}</p>
