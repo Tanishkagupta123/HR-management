@@ -16,6 +16,7 @@ export default function AdminHiring() {
       alert("Error updating data");
     }
   };
+  
 
   return (
     <div className="p-8">
