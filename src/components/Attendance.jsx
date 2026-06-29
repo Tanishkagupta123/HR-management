@@ -5,6 +5,7 @@ import { useOutletContext } from 'react-router-dom';
 export default function Attendance() {
   const { employeesList } = useOutletContext();
   const [records, setRecords] = useState({});
+  const STORAGE_KEY = 'manualAttendanceRecords';
 
   const calculateWorkHours = (inTime, outTime) => {
     if (!inTime || !outTime) return '--';
@@ -16,12 +17,31 @@ export default function Attendance() {
     return `${h}h ${m}m`;
   };
 
+  const readManualRecords = () => {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    } catch (err) {
+      return {};
+    }
+  };
+
+  const saveManualRecords = (data) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  };
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  };
+
   const fetchAttendanceData = async () => {
+    const manual = readManualRecords();
     try {
       const res = await axios.get('http://localhost:8000/attendance/today');
-      setRecords(res.data);
+      setRecords({ ...(res.data || {}), ...manual });
     } catch (err) {
       console.error("Data sync error", err);
+      setRecords(manual);
     }
   };
 
@@ -32,12 +52,30 @@ export default function Attendance() {
   }, []);
 
   const handleAction = async (empId, type) => {
+    const currentTime = getCurrentTime();
+    const updatedRecords = { ...records };
+    const rec = { ...updatedRecords[empId] };
+
+    if (type === 'CHECK-IN') {
+      rec.checkIn = currentTime;
+      rec.status = 'IN';
+      rec.mode = 'Manual';
+    } else {
+      rec.checkOut = currentTime;
+      rec.status = rec.checkIn ? 'COMPLETED' : 'OUT';
+      rec.mode = 'Manual';
+    }
+
+    updatedRecords[empId] = rec;
+    setRecords(updatedRecords);
+    saveManualRecords(updatedRecords);
+
     try {
-      await axios.post('http://localhost:8000/attendance/mark', { empId, type, mode: 'Manual' });
+      await axios.post('http://localhost:8000/attendance/mark', { empId, student_id: empId, type, mode: 'Manual' });
       alert(`${type} Success!`);
       fetchAttendanceData();
     } catch (err) {
-      alert("API Error");
+      alert("Manual record saved locally.");
     }
   };
 

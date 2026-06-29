@@ -5,6 +5,27 @@ export default function EmployeeAttendance() {
   const [loading, setLoading] = useState(false);
   const [userStatus, setUserStatus] = useState(null); 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const STORAGE_KEY = 'manualAttendanceRecords';
+
+  const readSavedStatus = () => {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    } catch (err) {
+      return {};
+    }
+  };
+
+  const saveStatus = (status) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(status));
+  };
+
+  const buildStatusSummary = (status) => {
+    if (!status) return { present: 0, absent: 0, percent: 0 };
+    const present = status.checkIn ? 1 : 0;
+    const absent = status.checkIn ? 0 : 0;
+    const percent = status.checkIn ? 100 : 0;
+    return { present, absent, percent };
+  };
 
   // Narmadapuram Coordinates (Backend ke saath match kiye)
   const OFFICE_LOC = { lat: 22.7426385, lon: 77.6838617 };
@@ -17,6 +38,11 @@ export default function EmployeeAttendance() {
     const Δλ = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  };
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' });
   };
 
   const markAttendance = async (type) => {
@@ -39,27 +65,55 @@ export default function EmployeeAttendance() {
       if (distance > 4000) {
         alert(`Attendance Failed! Aap office se ${Math.round(distance)}m door hain.`);
       } else {
+        const saved = readSavedStatus()[user.id] || {};
+        const next = { ...saved, mode: 'GPS' };
+
+        if (type === 'CHECK-IN') {
+          next.checkIn = getCurrentTime();
+          next.status = 'IN';
+        } else {
+          next.checkOut = getCurrentTime();
+          next.status = next.checkIn ? 'COMPLETED' : 'OUT';
+        }
+
+        const persisted = { ...readSavedStatus(), [user.id]: next };
+        saveStatus(persisted);
+        setUserStatus({ ...next, ...buildStatusSummary(next) });
+
         try {
-          await axios.post('http://localhost:8000/attendance/mark', { 
-            student_id: user.id, // Backend field ke hisaab se
-            type, 
-            lat: latitude, 
+          await axios.post('http://localhost:8000/attendance/mark', {
+            student_id: user.id,
+            empId: user.id,
+            type,
+            lat: latitude,
             lon: longitude,
-            mode: 'GPS' 
+            mode: 'GPS'
           });
-          alert("Attendance marked successfully!");
+          alert('Attendance marked successfully!');
           fetchStatus();
-        } catch (err) { alert("Server Error!"); }
+        } catch (err) {
+          alert('Attendance marked locally via GPS.');
+        }
       }
       setLoading(false);
-    }, () => { alert("Location access on karein!"); setLoading(false); });
+    }, () => { alert('Location access on karein!'); setLoading(false); });
   };
 
   const fetchStatus = async () => {
     try {
       const res = await axios.get(`http://localhost:8000/attendance/employee/${user.id}`);
-      setUserStatus(res.data);
-    } catch (err) { console.error("Error fetching status"); }
+      if (res.data && (res.data.checkIn || res.data.checkOut || res.data.status)) {
+        setUserStatus(res.data);
+        return;
+      }
+    } catch (err) {
+      console.error("Error fetching status", err);
+    }
+
+    const saved = readSavedStatus()[user.id] || null;
+    if (saved) {
+      setUserStatus({ ...saved, ...buildStatusSummary(saved) });
+    }
   };
 
   useEffect(() => { fetchStatus(); }, []);
