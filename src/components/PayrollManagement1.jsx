@@ -89,17 +89,45 @@ export default function PayrollManagement1() {
           </div>
         </div>
 
-        <div className="mt-12 bg-white rounded-3xl p-8 border">
-            <h2 className="text-2xl font-bold mb-6 text-violet-900">Payroll History</h2>
-            <table className="w-full text-left">
-              <thead><tr className="border-b text-slate-500"><th className="p-3">Employee</th><th className="p-3">Gross</th><th className="p-3">Net</th></tr></thead>
-              <tbody>
-                {payrollList.map((p, i) => (
-                  <tr key={i} className="border-b hover:bg-slate-50"><td className="p-3 font-bold">{p.employee_name}</td><td className="p-3">₹{p.gross_salary}</td><td className="p-3 text-blue-700 font-bold">₹{p.net_salary}</td></tr>
-                ))}
-              </tbody>
-            </table>
-        </div>
+      {/* History Table */}
+<div className="mt-12 bg-white rounded-3xl p-8 border overflow-x-auto">
+  <h2 className="text-2xl font-bold mb-6 text-violet-900">Payroll History</h2>
+  <table className="w-full text-left text-sm">
+    <thead>
+      <tr className="border-b text-slate-500">
+        <th className="p-3">Employee</th>
+        <th className="p-3">Basic</th>
+        <th className="p-3">HRA</th>
+        <th className="p-3">Med</th>
+        <th className="p-3">Travel</th>
+        <th className="p-3">Overtime</th>
+        <th className="p-3">Bonus</th>
+        <th className="p-3 text-red-500">Deductions</th>
+        <th className="p-3">Gross</th>
+        <th className="p-3 text-blue-700">Net</th>
+      </tr>
+    </thead>
+    <tbody>
+      {payrollList.map((p, i) => (
+        <tr key={i} className="border-b hover:bg-slate-50">
+          <td className="p-3 font-bold">{p.employee_name}</td>
+          <td className="p-3">₹{p.basic_salary}</td>
+          <td className="p-3">₹{p.house_rent}</td>
+          <td className="p-3">₹{p.medical}</td>
+          <td className="p-3">₹{p.travel}</td>
+          <td className="p-3">₹{p.overtime}</td>
+          <td className="p-3">₹{p.bonus}</td>
+          {/* Deductions: Leave + Other */}
+          <td className="p-3 text-red-600 font-semibold">
+             ₹{Number(p.leave_deduction || 0) + Number(p.other_deduction || 0)}
+          </td>
+          <td className="p-3 font-semibold">₹{p.gross_salary}</td>
+          <td className="p-3 text-blue-700 font-bold">₹{p.net_salary}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
       </div>
     </div>
   );
