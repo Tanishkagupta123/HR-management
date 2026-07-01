@@ -132,3 +132,4 @@ export default function PayrollManagement1() {
     </div>
   );
 }
+
