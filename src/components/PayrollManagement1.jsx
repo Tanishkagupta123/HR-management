@@ -11,22 +11,29 @@ export default function PayrollManagement1() {
   const [payrollList, setPayrollList] = useState([]);
 
   // --- CALCULATIONS ---
-  // 1. Gross Earnings (Core Salary)
-  const grossEarnings = Number(form.basicSalary || 0) + Number(form.houseRent || 0) + 
-                        Number(form.medical || 0) + Number(form.travel || 0);
+  const basic = Number(form.basicSalary || 0);
+  const hra = Number(form.houseRent || 0);
+  const med = Number(form.medical || 0);
+  const trav = Number(form.travel || 0);
+  const ot = Number(form.overtime || 0);
+  const bon = Number(form.bonus || 0);
+  const leave = Number(form.leaveDeduction || 0);
+  const other = Number(form.otherDeduction || 0);
 
-  // 2. Govt Deductions (PF/ESI/Tax based on Basic/Gross)
-  const pf = (Number(form.basicSalary || 0) * 0.12).toFixed(2);
-  const esi = (grossEarnings * 0.0075).toFixed(2);
-  const profTax = 200;
+  const grossEarnings = basic + hra + med + trav;
+  
+  // Logic: Agar basic 0 hai to deductions bhi 0 honge
+  const pf = basic > 0 ? (basic * 0.12).toFixed(2) : 0;
+  const esi = grossEarnings > 0 ? (grossEarnings * 0.0075).toFixed(2) : 0;
+  const profTax = basic > 0 ? 200 : 0; 
+  
   const govtDeductions = Number(pf) + Number(esi) + Number(profTax);
+  const totalGrossForDisplay = (grossEarnings + ot + bon).toFixed(2);
   
-  // 3. Final Net Calculation Logic
-  // Formula: (GrossEarnings - GovtDeductions) + (Bonus + Overtime) - (Leave + Other Deductions)
-  const netSalary = (grossEarnings - govtDeductions + Number(form.bonus || 0) + Number(form.overtime || 0) - Number(form.leaveDeduction || 0) - Number(form.otherDeduction || 0)).toFixed(2);
-  
-  // Total for display
-  const totalGrossForDisplay = (grossEarnings + Number(form.overtime || 0) + Number(form.bonus || 0)).toFixed(2);
+  // Net Salary: Agar basic > 0 hai tabhi calculate kare, nahi toh 0.00
+  const netSalary = basic > 0 
+    ? Math.max(0, (Number(totalGrossForDisplay) - govtDeductions - leave - other)).toFixed(2) 
+    : "0.00";
 
   const fetchData = async () => {
     try {
@@ -73,7 +80,6 @@ export default function PayrollManagement1() {
         <div className="mt-8 bg-slate-50 rounded-3xl border p-8">
           <h2 className="text-2xl font-bold text-violet-900 mb-8">Salary Calculation</h2>
           <div className="grid md:grid-cols-2 gap-6">
-              {/* Select Employee */}
               <div>
                 <label className="font-medium">Employee</label>
                 <select name="employee" value={form.employee} onChange={handleChange} className="w-full mt-2 border rounded-xl p-3">
@@ -81,7 +87,6 @@ export default function PayrollManagement1() {
                   {employees.map((emp, i) => <option key={i} value={emp.name}>{emp.name}</option>)}
                 </select>
               </div>
-              {/* Inputs */}
               <div><label className="font-medium">Basic Salary</label><input type="number" name="basicSalary" value={form.basicSalary} onChange={handleChange} className="w-full mt-2 border rounded-xl p-3"/></div>
               <div><label className="font-medium">House Rent</label><input type="number" name="houseRent" value={form.houseRent} onChange={handleChange} className="w-full mt-2 border rounded-xl p-3"/></div>
               <div><label className="font-medium">Medical</label><input type="number" name="medical" value={form.medical} onChange={handleChange} className="w-full mt-2 border rounded-xl p-3"/></div>
@@ -119,7 +124,7 @@ export default function PayrollManagement1() {
                   <td className="p-3">₹{p.basic_salary}</td>
                   <td className="p-3 text-red-600">₹{p.pf || 0}</td>
                   <td className="p-3 text-red-600">₹{p.esi || 0}</td>
-                  <td className="p-3 text-red-600">₹{p.tax || 200}</td>
+                  <td className="p-3 text-red-600">₹{p.tax || 0}</td>
                   <td className="p-3 text-red-600">₹{Number(p.leave_deduction || 0) + Number(p.other_deduction || 0)}</td>
                   <td className="p-3 font-bold">₹{p.gross_salary}</td>
                   <td className="p-3 font-bold text-blue-700">₹{p.net_salary}</td>
