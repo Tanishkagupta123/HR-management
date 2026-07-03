@@ -1,189 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Save, Download, FileText, ChevronDown } from "lucide-react";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default function PFESITaxManagement() {
-  const [form, setForm] = useState({
-    basicSalary: 15000,
-    pfPercent: 12,
-    esiPercent: 0.75,
-    professionalTax: 200,
-    tds: 2050,
-  });
+  const [payrollList, setPayrollList] = useState([]);
+  const [selectedEmp, setSelectedEmp] = useState(null);
+  const [form, setForm] = useState({ pfPercent: 12, esiPercent: 0.75, professionalTax: 200, tds: 0 });
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: Number(e.target.value),
+  useEffect(() => {
+    axios.get("http://localhost:8000/payroll/all").then(res => setPayrollList(res.data));
+  }, []);
+
+  const pf = ((selectedEmp?.basic_salary * form.pfPercent) / 100).toFixed(2);
+  const esi = ((selectedEmp?.basic_salary * form.esiPercent) / 100).toFixed(2);
+  const totalDeduction = (Number(pf) + Number(esi) + Number(form.professionalTax) + Number(form.tds)).toFixed(2);
+  const finalNet = (selectedEmp?.net_salary - totalDeduction).toFixed(2);
+
+  const downloadSalarySlip = () => {
+    const doc = new jsPDF();
+    doc.text(`Salary Deduction Slip: ${selectedEmp.employee_name}`, 20, 10);
+    doc.autoTable({
+      head: [['Description', 'Amount']],
+      body: [['Basic', selectedEmp.basic_salary], ['PF', pf], ['ESI', esi], ['TDS', form.tds], ['Final Net Salary', finalNet]]
     });
+    doc.save(`${selectedEmp.employee_name}_Deduction_Slip.pdf`);
   };
 
-  const pfAmount = (
-    (form.basicSalary * form.pfPercent) /
-    100
-  ).toFixed(2);
-
-  const esiAmount = (
-    (form.basicSalary * form.esiPercent) /
-    100
-  ).toFixed(2);
-
-  const totalDeduction = (
-    Number(pfAmount) +
-    Number(esiAmount) +
-    Number(form.professionalTax) +
-    Number(form.tds)
-  ).toFixed(2);
-
   return (
-    <div className="bg-white rounded-3xl shadow-sm border p-8">
+    <div className="p-8 bg-slate-50 min-h-screen">
+      <div className="max-w-5xl mx-auto">
+        <h2 className="text-3xl font-extrabold text-slate-900 mb-6">Statutory Deduction Center</h2>
+        
+        {/* Selection Box */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border mb-8 flex items-center gap-4">
+          <FileText className="text-violet-600" />
+          <select className="flex-1 outline-none text-lg font-medium" onChange={(e) => setSelectedEmp(payrollList.find(p => p.id == e.target.value))}>
+            <option>Select Employee to view Deductions</option>
+            {payrollList.map(p => <option key={p.id} value={p.id}>{p.employee_name}</option>)}
+          </select>
+        </div>
 
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-violet-950">
-          PF / ESI / Tax Management
-        </h2>
-        <p className="text-slate-500 mt-2">
-          Configure employee statutory deductions including PF, ESI,
-          Professional Tax and TDS.
-        </p>
+        {selectedEmp && (
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Input Side */}
+            <div className="bg-white p-8 rounded-3xl border shadow-sm">
+              <h3 className="font-bold text-xl mb-6">Configuration</h3>
+              <div className="space-y-4">
+                <div><label className="text-sm font-semibold text-slate-500">PF %</label>
+                <input type="number" name="pfPercent" value={form.pfPercent} onChange={e => setForm({...form, pfPercent: e.target.value})} className="w-full border rounded-xl p-3" /></div>
+                <div><label className="text-sm font-semibold text-slate-500">TDS (₹)</label>
+                <input type="number" name="tds" value={form.tds} onChange={e => setForm({...form, tds: e.target.value})} className="w-full border rounded-xl p-3" /></div>
+              </div>
+            </div>
+
+            {/* Professional Summary Side */}
+            <div className="bg-white p-8 rounded-3xl border shadow-lg border-violet-100">
+              <h3 className="font-bold text-xl mb-6">Pay Breakdown</h3>
+              <div className="space-y-3 text-slate-600">
+                <div className="flex justify-between"><span>Gross Salary</span> <span>₹{selectedEmp.gross_salary}</span></div>
+                <div className="flex justify-between text-red-500"><span>PF Deduction</span> <span>-₹{pf}</span></div>
+                <div className="flex justify-between text-red-500"><span>ESI Deduction</span> <span>-₹{esi}</span></div>
+                <div className="border-t pt-4 flex justify-between text-lg font-bold text-slate-900">
+                  <span>Final Net Pay</span> <span>₹{finalNet}</span>
+                </div>
+              </div>
+              <div className="mt-8 flex gap-3">
+                <button onClick={downloadSalarySlip} className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white py-3 rounded-xl hover:bg-black"><Download size={18}/> PDF</button>
+                <button className="flex-1 flex items-center justify-center gap-2 bg-violet-600 text-white py-3 rounded-xl hover:bg-violet-700"><Save size={18}/> Save</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Form */}
-      <div className="grid md:grid-cols-2 gap-6">
-
-        {/* Basic Salary */}
-        <div>
-          <label className="block mb-2 font-semibold text-slate-700">
-            Basic Salary
-          </label>
-          <input
-            type="number"
-            name="basicSalary"
-            value={form.basicSalary}
-            onChange={handleChange}
-            className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-violet-500 outline-none"
-          />
-        </div>
-
-        {/* PF */}
-        <div>
-          <label className="block mb-2 font-semibold text-slate-700">
-            PF (%)
-          </label>
-          <input
-            type="number"
-            name="pfPercent"
-            value={form.pfPercent}
-            onChange={handleChange}
-            className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-violet-500 outline-none"
-          />
-        </div>
-
-        {/* ESI */}
-        <div>
-          <label className="block mb-2 font-semibold text-slate-700">
-            ESI (%)
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            name="esiPercent"
-            value={form.esiPercent}
-            onChange={handleChange}
-            className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-violet-500 outline-none"
-          />
-        </div>
-
-        {/* Professional Tax */}
-        <div>
-          <label className="block mb-2 font-semibold text-slate-700">
-            Professional Tax (₹)
-          </label>
-          <input
-            type="number"
-            name="professionalTax"
-            value={form.professionalTax}
-            onChange={handleChange}
-            className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-violet-500 outline-none"
-          />
-        </div>
-
-        {/* TDS */}
-        <div className="md:col-span-2">
-          <label className="block mb-2 font-semibold text-slate-700">
-            TDS (₹)
-          </label>
-          <input
-            type="number"
-            name="tds"
-            value={form.tds}
-            onChange={handleChange}
-            className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-violet-500 outline-none"
-          />
-        </div>
-
-      </div>
-
-      {/* Summary */}
-      <div className="mt-10 bg-slate-50 rounded-2xl border p-6">
-
-        <h3 className="text-xl font-bold text-slate-800 mb-6">
-          Deduction Summary
-        </h3>
-
-        <div className="space-y-4">
-
-          <div className="flex justify-between">
-            <span className="text-slate-600">PF Amount</span>
-            <span className="font-semibold text-violet-700">
-              ₹{pfAmount}
-            </span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="text-slate-600">ESI Amount</span>
-            <span className="font-semibold text-violet-700">
-              ₹{esiAmount}
-            </span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="text-slate-600">
-              Professional Tax
-            </span>
-            <span className="font-semibold text-violet-700">
-              ₹{form.professionalTax}
-            </span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="text-slate-600">TDS</span>
-            <span className="font-semibold text-violet-700">
-              ₹{form.tds}
-            </span>
-          </div>
-
-          <hr />
-
-          <div className="flex justify-between text-lg">
-            <span className="font-bold text-slate-800">
-              Total Deduction
-            </span>
-            <span className="font-bold text-red-600">
-              ₹{totalDeduction}
-            </span>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Save Button */}
-      <div className="mt-8">
-        <button className="bg-violet-700 hover:bg-violet-800 text-white px-8 py-3 rounded-xl font-semibold transition">
-          Save
-        </button>
-      </div>
-
     </div>
   );
 }
