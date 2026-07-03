@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Download, Mail, FileText, Search, X } from "lucide-react"; 
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 export default function PayslipGeneration() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,32 +29,44 @@ export default function PayslipGeneration() {
     setSelectedEmp(emp);
   };
 
-  // PDF Generation Logic
+  // PDF Generation Logic - FIXED
   const handleDownload = (emp) => {
     const doc = new jsPDF();
     doc.setFontSize(20);
     doc.text("SALARY SLIP", 105, 20, { align: "center" });
-    doc.autoTable({
-      startY: 30,
-      head: [['Field', 'Details']],
+    doc.setFontSize(12);
+    doc.text(`Employee: ${emp.employee_name}`, 14, 30);
+    
+    // autoTable(doc, { ... }) ka sahi syntax
+    autoTable(doc, {
+      startY: 35,
+      head: [['Description', 'Amount (₹)']],
       body: [
-        ['Employee Name', emp.employee_name],
-        ['Basic Salary', `₹${emp.basic_salary}`],
-        ['Net Salary', `₹${emp.net_salary}`],
-        ['Status', emp.status],
+        ['Basic Salary', emp.basic_salary || 0],
+        ['HRA', emp.house_rent || 0],
+        ['Medical', emp.medical || 0],
+        ['Travel', emp.travel || 0],
+        ['Bonus', emp.bonus || 0],
+        ['Overtime', emp.overtime || 0],
+        ['PF (Deduction)', `-${emp.pf || 0}`],
+        ['ESI (Deduction)', `-${emp.esi || 0}`],
+        ['Tax (Deduction)', `-${emp.tax || 0}`],
+        ['Leaves/Other Deductions', `-${Number(emp.leave_deduction || 0) + Number(emp.other_deduction || 0)}`],
+        ['Gross Salary', emp.gross_salary || 0],
+        ['NET SALARY', emp.net_salary || 0],
       ],
+      theme: 'striped',
     });
+    
     doc.save(`${emp.employee_name}_Payslip.pdf`);
   };
 
-  // Email Logic (Placeholder for Backend Connection)
   const handleMail = async (emp) => {
     try {
-      // Iske liye aapko backend mein nodemailer setup karna hoga
       await axios.post('http://localhost:8000/payslip/send-mail', emp);
       alert(`Email sent successfully to ${emp.employee_name}`);
     } catch (err) {
-      alert("Failed to send email. Ensure backend route is configured.");
+      alert("Failed to send email.");
     }
   };
 
@@ -126,14 +138,41 @@ export default function PayslipGeneration() {
       </div>
 
       {selectedEmp && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-          <div className="bg-white p-8 rounded-3xl w-full max-w-sm shadow-2xl relative">
-            <button onClick={() => setSelectedEmp(null)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500"><X size={24}/></button>
-            <h2 className="text-2xl font-bold text-violet-900 mb-6">Salary Detail</h2>
-            <div className="space-y-4">
-              <p>Employee: <b>{selectedEmp.employee_name}</b></p>
-              <p>Basic Salary: <b>₹{selectedEmp.basic_salary}</b></p>
-              <p>Net Salary: <b>₹{selectedEmp.net_salary}</b></p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white p-8 rounded-3xl w-full max-w-sm shadow-2xl relative border border-slate-100 animate-in fade-in zoom-in duration-300">
+            <button 
+              onClick={() => setSelectedEmp(null)} 
+              className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors bg-slate-100 p-1 rounded-full"
+            >
+              <X size={24}/>
+            </button>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-violet-900">Salary Breakdown</h2>
+              <p className="text-slate-500 text-sm mt-1">{selectedMonth} - {selectedEmp.employee_name}</p>
+            </div>
+            <div className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+              <div className="space-y-2 text-sm text-slate-700">
+                <div className="flex justify-between"><span>Basic:</span> <b>₹{selectedEmp.basic_salary || 0}</b></div>
+                <div className="flex justify-between"><span>HRA:</span> <b>₹{selectedEmp.house_rent || 0}</b></div>
+                <div className="flex justify-between"><span>Medical:</span> <b>₹{selectedEmp.medical || 0}</b></div>
+                <div className="flex justify-between"><span>Travel:</span> <b>₹{selectedEmp.travel || 0}</b></div>
+                <div className="flex justify-between"><span>Bonus:</span> <b>₹{selectedEmp.bonus || 0}</b></div>
+                <div className="flex justify-between"><span>OT:</span> <b>₹{selectedEmp.overtime || 0}</b></div>
+              </div>
+              <div className="border-t border-slate-200 pt-3 space-y-2 text-sm text-red-600">
+                <div className="flex justify-between"><span>PF:</span> <b>-₹{selectedEmp.pf || 0}</b></div>
+                <div className="flex justify-between"><span>ESI:</span> <b>-₹{selectedEmp.esi || 0}</b></div>
+                <div className="flex justify-between"><span>Tax:</span> <b>-₹{selectedEmp.tax || 0}</b></div>
+                <div className="flex justify-between"><span>Leaves/Other:</span> <b>-₹{Number(selectedEmp.leave_deduction || 0) + Number(selectedEmp.other_deduction || 0)}</b></div>
+              </div>
+            </div>
+            <div className="mt-6 space-y-2">
+              <div className="flex justify-between text-lg font-bold text-slate-900 px-2">
+                <span>Gross:</span> <span>₹{selectedEmp.gross_salary || 0}</span>
+              </div>
+              <div className="flex justify-between text-xl font-bold text-violet-700 bg-violet-50 p-3 rounded-xl border border-violet-100">
+                <span>Net Salary:</span> <span>₹{selectedEmp.net_salary || 0}</span>
+              </div>
             </div>
           </div>
         </div>
