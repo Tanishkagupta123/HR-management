@@ -93,7 +93,7 @@ setHiringList(hRes.data);
     { name: 'Task & Workflow', path: '/admin/task-workflow-management' },
     { name: 'Add Task', path: '/admin/add-task' },
     { name: 'Data of Tasks', path: '/admin/data-tasks' },
-    { name: 'Recruitment', path: '/admin/hiring' }
+    { name: 'Hiring Recruitment', path: '/admin/hiring' }
   ];
 
   return (
