@@ -19,14 +19,7 @@ import PromotionTracking from './components/PromotionTracking';
 import EmployeeSelfService from './components/EmployeeSelfService';
 import TaskWorkflowManagement from './components/TaskWorkflowManagement';
 import TeamCollaboration from './components/TeamCollaboration';
-<<<<<<< HEAD
 import Communication from './components/communication';
-=======
-<<<<<<< HEAD
-=======
-import Communication from './components/communication';
->>>>>>> 8b57427 (first commit)
->>>>>>> temp-branch
 import AddTask from './components/AddTask';
 import DataOfTasks from './components/DataOfTasks';
 import AdminHiring from './pages/AdminHiring';
@@ -37,23 +30,15 @@ import EmployeeTasks from './employee/EmployeeTasks';
 import EmployeeLeave from './employee/EmployeeLeave';
 import PayslipGeneration from './components/PayslipGeneration';
 import PFESITaxManagement from './components/PFESITaxManagement';
-
-<<<<<<< HEAD
-import ChatbotPage from './employee/ChatbotPage';
-=======
-import Chatbot from './employee/Chatbot';
->>>>>>> temp-branch
-
-
+import ChatbotPage from './employee/ChatbotPage'; // Maine ChatbotPage rakha hai, agar Chatbot file hai toh naam change kar lena
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Route */}
         <Route path="/" element={<Login />} />
 
-        {/* Admin Dashboard: Saare Admin ke kaam yahan nested hain */}
+        {/* Admin Dashboard */}
         <Route path="/admin" element={<AdminDashboard />}>
           <Route index element={<AllEmployees />} />
           <Route path="add-employee" element={<AddEmployee />} />
@@ -72,21 +57,14 @@ export default function App() {
           <Route path="performance-management/feedback" element={<EmployeeReviews />} />
           <Route path="ess" element={<EmployeeSelfService />} />
           <Route path="task-workflow-management" element={<TaskWorkflowManagement />} />
-<<<<<<< HEAD
           <Route path="communication-system" element={<Communication />} />
-=======
-<<<<<<< HEAD
-=======
-          <Route path="communication-system" element={<Communication />} />
->>>>>>> 8b57427 (first commit)
->>>>>>> temp-branch
           <Route path="team-collaboration" element={<TeamCollaboration />} />
           <Route path="add-task" element={<AddTask />} />
           <Route path="data-tasks" element={<DataOfTasks />} />
           <Route path="hiring" element={<AdminHiring />} />
         </Route>
 
-        {/* Employee Dashboard: Yahan nested routes ka use hoga */}
+        {/* Employee Dashboard */}
         <Route path="/dashboard" element={<EmployeeDashboard />}>
           <Route index element={<EmployeeProfile />} />
           <Route path="tasks" element={<EmployeeTasks />} />
@@ -94,11 +72,7 @@ export default function App() {
           <Route path="attendance" element={<EmployeeAttendance />} />
           <Route path="communication-systemm" element={<TeamCollaboration />} />
           <Route path="team-collaboration" element={<TeamCollaboration />} />
-<<<<<<< HEAD
           <Route path="chatbot" element={<ChatbotPage />} />
-=======
-          <Route path="chatbot" element={<Chatbot />} />
->>>>>>> temp-branch
         </Route>
       </Routes>
     </BrowserRouter>

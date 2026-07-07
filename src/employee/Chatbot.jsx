@@ -1,20 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
-<<<<<<< HEAD
 export default function Chatbot({ userType, empId, isPage = false }) {
-=======
-export default function Chatbot({ userType, empId }) {
   const [isOpen, setIsOpen] = useState(false);
->>>>>>> temp-branch
   const [msg, setMsg] = useState('');
   const [chat, setChat] = useState([]);
   const chatEndRef = useRef(null);
 
-<<<<<<< HEAD
-=======
   // Auto-scroll to bottom
->>>>>>> temp-branch
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chat]);
 
   const sendMessage = async () => {
@@ -22,52 +15,27 @@ export default function Chatbot({ userType, empId }) {
     const newChat = [...chat, { role: 'user', text: msg }];
     setChat(newChat);
     setMsg('');
-<<<<<<< HEAD
+
     try {
-      // Backend ko userType bhej rahe hain
       const res = await axios.post('http://localhost:8000/api/chatbot/ask', { 
         question: msg, userType, empId 
       });
       setChat([...newChat, { role: 'bot', text: res.data.answer }]);
     } catch (err) {
       setChat([...newChat, { role: 'bot', text: "Error: AI se connect nahi ho pa raha." }]);
-=======
-
-    try {
-      const res = await axios.post('http://localhost:8000/api/chatbot/ask', { question: msg, userType, empId });
-      setChat([...newChat, { role: 'bot', text: res.data.answer }]);
-    } catch (err) {
-      setChat([...newChat, { role: 'bot', text: "Sorry, I'm having trouble connecting." }]);
->>>>>>> temp-branch
     }
   };
 
   return (
-<<<<<<< HEAD
-    <div className={isPage ? "w-full h-full flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm border" : "w-80 h-96 bg-white rounded-3xl shadow-2xl border flex flex-col"}>
-      <div className="bg-violet-900 p-4 text-white font-bold">
-        {userType === 'ADMIN' ? 'Hiring Assistant' : 'HR Assistant'}
-      </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
-        {chat.map((c, i) => (
-          <div key={i} className={`p-3 rounded-2xl text-sm max-w-[85%] ${c.role === 'user' ? 'bg-violet-600 text-white ml-auto' : 'bg-white border'}`}>
-            {c.text}
-          </div>
-        ))}
-        <div ref={chatEndRef} />
-      </div>
-      <div className="p-3 border-t flex gap-2">
-        <input value={msg} onChange={(e) => setMsg(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && sendMessage()} className="flex-1 p-2 border rounded-xl" placeholder="Kuch puchiye..." />
-        <button onClick={sendMessage} className="bg-violet-900 text-white px-4 py-2 rounded-xl">Send</button>
-      </div>
-=======
-    <div className="fixed bottom-6 right-6 z-[9999]">
-      {isOpen && (
-        <div className="bg-white w-80 h-96 shadow-2xl rounded-3xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div className={isPage ? "w-full h-full flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm border" : "fixed bottom-6 right-6 z-[9999]"}>
+      
+      {/* Agar isPage true hai toh direct dikhega, warna button click par */}
+      {(isPage || isOpen) && (
+        <div className={isPage ? "flex flex-col h-full" : "bg-white w-80 h-96 shadow-2xl rounded-3xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200"}>
           {/* Header */}
           <div className="bg-violet-900 p-4 text-white font-bold flex justify-between items-center">
-            <span>HR Assistant</span>
-            <button onClick={() => setIsOpen(false)} className="text-white hover:text-slate-200">✕</button>
+            <span>{userType === 'ADMIN' ? 'Hiring Assistant' : 'HR Assistant'}</span>
+            {!isPage && <button onClick={() => setIsOpen(false)} className="text-white hover:text-slate-200">✕</button>}
           </div>
           
           {/* Messages */}
@@ -82,18 +50,24 @@ export default function Chatbot({ userType, empId }) {
 
           {/* Input */}
           <div className="p-3 border-t flex gap-2">
-            <input value={msg} onChange={(e) => setMsg(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              className="flex-1 border-none focus:ring-0 text-sm p-2" placeholder="Ask something..." />
+            <input 
+              value={msg} 
+              onChange={(e) => setMsg(e.target.value)} 
+              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              className="flex-1 border-none focus:ring-0 text-sm p-2" 
+              placeholder="Kuch puchiye..." 
+            />
             <button onClick={sendMessage} className="bg-violet-900 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-violet-800">Send</button>
           </div>
         </div>
       )}
       
-      {/* Floating Button */}
-      <button onClick={() => setIsOpen(!isOpen)} className="bg-violet-900 p-4 rounded-full text-white shadow-xl hover:scale-105 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-      </button>
->>>>>>> temp-branch
+      {/* Floating Button (Sirf tab dikhega agar isPage false ho) */}
+      {!isPage && (
+        <button onClick={() => setIsOpen(!isOpen)} className="bg-violet-900 p-4 rounded-full text-white shadow-xl hover:scale-105 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+        </button>
+      )}
     </div>
   );
 }
