@@ -1,19 +1,36 @@
 import { useOutletContext } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 export default function AdminHiring() {
-  const { hiringList } = useOutletContext(); 
+  const { hiringList } = useOutletContext();
+  const [hiringData, setHiringData] = useState([]);
+
+  useEffect(() => {
+    setHiringData(hiringList || []);
+  }, [hiringList]);
+
+  const formatLocalDateTime = (dateTime) => {
+    if (!dateTime) return '';
+    return dateTime.toString().replace(' ', 'T').slice(0, 16);
+  };
+
+  const handleFieldChange = (id, field, value) => {
+    setHiringData((prev) => prev.map((item) => item.id === id ? { ...item, [field]: value } : item));
+  };
 
   // Pipeline update logic
   const handleSave = async (id, status, date) => {
     try {
-      await axios.put(`http://localhost:8000/hiring/update-status/${id}`, { 
-        status, 
-        interview_date: date 
+      await axios.put(`http://localhost:8000/hiring/update-status/${id}`, {
+        status,
+        interview_date: date || null,
       });
-      alert("Pipeline Updated Successfully!");
+      setHiringData((prev) => prev.map((item) => item.id === id ? { ...item, status, interview_date: date } : item));
+      alert('Pipeline Updated Successfully!');
     } catch (err) {
-      alert("Error updating data");
+      console.error(err);
+      alert('Error updating data');
     }
   };
 
@@ -38,8 +55,8 @@ export default function AdminHiring() {
             </tr>
           </thead>
           <tbody>
-            {hiringList && hiringList.length > 0 ? (
-              hiringList.map((app) => (
+            {hiringData && hiringData.length > 0 ? (
+              hiringData.map((app) => (
                 <tr key={app.id} className="border-b hover:bg-slate-50 transition">
                   <td className="p-4 font-bold">{app.name}</td>
                   <td className="p-4">{app.phone}</td>
@@ -54,7 +71,11 @@ export default function AdminHiring() {
                   
                   {/* Pipeline Inputs */}
                   <td className="p-4">
-                    <select id={`status-${app.id}`} className="border p-1 rounded text-sm" defaultValue={app.status}>
+                    <select
+                      value={app.status || 'Pending'}
+                      onChange={(e) => handleFieldChange(app.id, 'status', e.target.value)}
+                      className="border p-1 rounded text-sm"
+                    >
                       <option value="Pending">Pending</option>
                       <option value="Interview Scheduled">Interview Scheduled</option>
                       <option value="Selected">Selected</option>
@@ -62,11 +83,16 @@ export default function AdminHiring() {
                     </select>
                   </td>
                   <td className="p-4">
-                    <input type="datetime-local" id={`date-${app.id}`} className="border p-1 rounded text-sm" defaultValue={app.interview_date} />
+                    <input
+                      type="datetime-local"
+                      value={formatLocalDateTime(app.interview_date)}
+                      onChange={(e) => handleFieldChange(app.id, 'interview_date', e.target.value)}
+                      className="border p-1 rounded text-sm"
+                    />
                   </td>
                   <td className="p-4">
                     <button 
-                      onClick={() => handleSave(app.id, document.getElementById(`status-${app.id}`).value, document.getElementById(`date-${app.id}`).value)}
+                      onClick={() => handleSave(app.id, app.status || 'Pending', app.interview_date)}
                       className="bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-green-700"
                     >
                       Save

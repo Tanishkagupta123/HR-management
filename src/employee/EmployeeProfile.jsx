@@ -10,13 +10,22 @@ export default function EmployeeProfile() {
       try {
         const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
         if (loggedInUser.id) {
-          const res = await axios.get(`http://localhost:8000/employees/${loggedInUser.id}`);
-          setUser({ ...loggedInUser, ...(res.data || {}) });
+          const token = localStorage.getItem('token');
+          const config = token ? { headers: { 'Authorization': `Bearer ${token}` } } : {};
+          const res = await axios.get(`http://localhost:8000/employees/${loggedInUser.id}`, config);
+          if (res.data) {
+            // Merge API response (which has all fields) with logged-in user data
+            setUser({ ...loggedInUser, ...res.data });
+          } else {
+            // If API returns null, fall back to localStorage user
+            setUser(loggedInUser);
+          }
         } else {
           setUser(loggedInUser);
         }
       } catch (err) {
         console.error('Error fetching profile:', err);
+        // On error, use localStorage user
         const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
         setUser(loggedInUser);
       } finally {
