@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import Chatbot from '../employee/Chatbot';
 export default function AdminHiring() {
   const { hiringList } = useOutletContext();
   const [hiringData, setHiringData] = useState([]);
@@ -108,6 +108,9 @@ export default function AdminHiring() {
           </tbody>
         </table>
       </div>
+      <div className="fixed bottom-8 right-8 z-[1000] w-80 h-96">
+    <Chatbot userType="ADMIN" empId="admin-1" isPage={false} />
+</div>
     </div>
   );
 }

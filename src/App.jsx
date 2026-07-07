@@ -31,7 +31,7 @@ import EmployeeLeave from './employee/EmployeeLeave';
 import PayslipGeneration from './components/PayslipGeneration';
 import PFESITaxManagement from './components/PFESITaxManagement';
 
-import Chatbot from './employee/Chatbot';
+import ChatbotPage from './employee/ChatbotPage';
 
 
 
@@ -76,7 +76,7 @@ export default function App() {
           <Route path="attendance" element={<EmployeeAttendance />} />
           <Route path="communication-systemm" element={<TeamCollaboration />} />
           <Route path="team-collaboration" element={<TeamCollaboration />} />
-          <Route path="chatbot" element={<Chatbot />} />
+          <Route path="chatbot" element={<ChatbotPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
