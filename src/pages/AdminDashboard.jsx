@@ -88,6 +88,7 @@ setHiringList(hRes.data);
     { name: 'Payslip Generation', path: '/admin/payslip-generation' },
     // { name: 'PF / ESI / Tax Management', path: '/admin/pf-esi-tax-management' },
     { name: 'Performance Management', path: '/admin/performance-management' },
+    { name: 'Communication System', path: '/admin/communication-system' },
     { name: 'Employee Self Service', path: '/admin/ess' },
     { name: 'Team Collaboration', path: '/admin/team-collaboration' },
     { name: 'Task & Workflow', path: '/admin/task-workflow-management' },

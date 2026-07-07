@@ -9,8 +9,10 @@ export default function EmployeeDashboard() {
   const menuItems = [
     { name: 'My Profile', path: '/dashboard' },
     { name: 'My Tasks', path: '/dashboard/tasks' },
+    { name: 'Communication System', path: '/dashboard/communication-system' },
     { name: 'Apply Leave', path: '/dashboard/apply-leave' },
-    { name: 'Attendance', path: '/dashboard/attendance' }
+    { name: 'Attendance', path: '/dashboard/attendance' },
+    { name: 'HR Chatbot', path: '/dashboard/chatbot' }
   ];
 
   const handleLogout = () => {
@@ -34,6 +36,11 @@ export default function EmployeeDashboard() {
                 </Link>
               ))}
             </nav>
+            <div className="mt-6 mx-4 p-4 rounded-3xl bg-violet-50 border border-violet-100 text-slate-700">
+              <Link to="/dashboard/team-collaboration" className="w-full inline-flex items-center justify-center px-4 py-3 bg-violet-950 text-white rounded-2xl font-bold">
+                Open Chat
+              </Link>
+            </div>
         </div>
 
         {/* LOGOUT BUTTON */}

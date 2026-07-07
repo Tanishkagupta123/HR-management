@@ -19,6 +19,10 @@ import PromotionTracking from './components/PromotionTracking';
 import EmployeeSelfService from './components/EmployeeSelfService';
 import TaskWorkflowManagement from './components/TaskWorkflowManagement';
 import TeamCollaboration from './components/TeamCollaboration';
+<<<<<<< HEAD
+=======
+import Communication from './components/communication';
+>>>>>>> 8b57427 (first commit)
 import AddTask from './components/AddTask';
 import DataOfTasks from './components/DataOfTasks';
 import AdminHiring from './pages/AdminHiring';
@@ -30,7 +34,7 @@ import EmployeeLeave from './employee/EmployeeLeave';
 import PayslipGeneration from './components/PayslipGeneration';
 import PFESITaxManagement from './components/PFESITaxManagement';
 
-
+import Chatbot from './employee/Chatbot';
 
 
 
@@ -60,6 +64,10 @@ export default function App() {
           <Route path="performance-management/feedback" element={<EmployeeReviews />} />
           <Route path="ess" element={<EmployeeSelfService />} />
           <Route path="task-workflow-management" element={<TaskWorkflowManagement />} />
+<<<<<<< HEAD
+=======
+          <Route path="communication-system" element={<Communication />} />
+>>>>>>> 8b57427 (first commit)
           <Route path="team-collaboration" element={<TeamCollaboration />} />
           <Route path="add-task" element={<AddTask />} />
           <Route path="data-tasks" element={<DataOfTasks />} />
@@ -72,6 +80,9 @@ export default function App() {
           <Route path="tasks" element={<EmployeeTasks />} />
           <Route path="apply-leave" element={<EmployeeLeave />} />
           <Route path="attendance" element={<EmployeeAttendance />} />
+          <Route path="communication-systemm" element={<TeamCollaboration />} />
+          <Route path="team-collaboration" element={<TeamCollaboration />} />
+          <Route path="chatbot" element={<Chatbot />} />
         </Route>
       </Routes>
     </BrowserRouter>

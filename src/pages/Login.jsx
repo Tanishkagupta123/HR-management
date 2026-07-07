@@ -15,7 +15,16 @@ export default function Login() {
       const res = await axios.post('http://localhost:8000/admin/login', auth);
       if (res.data.success) {
         const role = res.data.user?.role || 'employee';
+        const token = res.data.token;
+        
+        // Store user and token
         localStorage.setItem('user', JSON.stringify(res.data.user));
+        if (token) {
+          localStorage.setItem('token', token);
+          // Set token in axios default headers
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
+        
         if (role === 'admin') navigate('/admin');
         else navigate('/dashboard');
       } else {
