@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 
 export default function AddTask() {
-  // Outlet se zaroori data aur functions nikaal liye
-  const { tasks, handleTaskChange, addNewTaskBlock, submitAllTasks, employeesList, departments, removeTaskBlock } = useOutletContext();
+  const { tasks: contextTasks, handleTaskChange, addNewTaskBlock, submitAllTasks, employeesList, departments, removeTaskBlock } = useOutletContext();
   
+  // Local state taaki add task par naya block turant dikhe
+  const [localTasks, setLocalTasks] = useState([{ client_name: '', title: '', task_date: '', hours: '', minutes: '', status: 'Pending', priority: 'Normal', description: '' }]);
+  
+  // Logic: Agar context tasks hain toh wo dikhao, nahi toh local tasks
+  const tasks = (contextTasks && contextTasks.length > 0) ? contextTasks : localTasks;
+
   const [dateTime, setDateTime] = useState(new Date());
 
   useEffect(() => {
@@ -20,6 +25,14 @@ export default function AddTask() {
     if (field === 'hours' && val > 23) val = 23;
     if (field === 'minutes' && val > 59) val = 59;
     handleTaskChange(index, field, val);
+  };
+
+  const handleAddClick = () => {
+    if (typeof addNewTaskBlock === 'function') {
+      addNewTaskBlock();
+    } else {
+      setLocalTasks([...localTasks, { client_name: '', title: '', task_date: '', hours: '', minutes: '', status: 'Pending', priority: 'Normal', description: '' }]);
+    }
   };
 
   return (
@@ -52,28 +65,38 @@ export default function AddTask() {
 
       {tasks.map((task, index) => (
         <div key={index} className="bg-white p-4 md:p-6 mb-6 rounded-2xl shadow-sm border relative">
-          {index > 0 && <button onClick={() => removeTaskBlock(index)} className="absolute top-2 right-4 text-red-500 font-bold text-lg">X</button>}
+          {index > 0 && (
+            <button type="button" onClick={() => removeTaskBlock ? removeTaskBlock(index) : setLocalTasks(localTasks.filter((_, i) => i !== index))} className="absolute top-2 right-4 text-red-500 font-bold text-lg">X</button>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <input className="w-full p-3 border rounded-xl" placeholder="Client Name" onChange={(e) => handleTaskChange(index, 'client_name', e.target.value)} />
-            <input className="w-full p-3 border rounded-xl" placeholder="Task Title" onChange={(e) => handleTaskChange(index, 'title', e.target.value)} />
-            <input type="date" className="w-full p-3 border rounded-xl" defaultValue={today} onChange={(e) => handleTaskChange(index, 'task_date', e.target.value)} />
+            <div><label className="block text-xs font-bold text-black mb-1">CLIENT NAME</label>
+            <input className="w-full p-3 border rounded-xl" placeholder="Client Name" onChange={(e) => handleTaskChange(index, 'client_name', e.target.value)} /></div>
+            <div><label className="block text-xs font-bold text-black mb-1">TASK TITLE</label>
+            <input className="w-full p-3 border rounded-xl" placeholder="Task Title" onChange={(e) => handleTaskChange(index, 'title', e.target.value)} /></div>
+            <div><label className="block text-xs font-bold text-black mb-1">DATE</label>
+            <input type="date" className="w-full p-3 border rounded-xl" defaultValue={today} onChange={(e) => handleTaskChange(index, 'task_date', e.target.value)} /></div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <input type="number" className="w-full p-3 border rounded-xl" placeholder="Hours" value={task.hours || ''} onChange={(e) => handleTimeInput(index, 'hours', e.target.value)} />
-            <input type="number" className="w-full p-3 border rounded-xl" placeholder="Mins" value={task.minutes || ''} onChange={(e) => handleTimeInput(index, 'minutes', e.target.value)} />
-            <select className="w-full p-3 border rounded-xl" onChange={(e) => handleTaskChange(index, 'status', e.target.value)}><option>Pending</option><option>Completed</option></select>
-            <select className="w-full p-3 border rounded-xl" onChange={(e) => handleTaskChange(index, 'priority', e.target.value)}><option>Normal</option><option>High</option></select>
+            <div><label className="block text-xs font-bold text-black mb-1">HOURS</label>
+            <input type="number" className="w-full p-3 border rounded-xl" placeholder="Hours" value={task.hours || ''} onChange={(e) => handleTimeInput(index, 'hours', e.target.value)} /></div>
+            <div><label className="block text-xs font-bold text-black mb-1">MINUTES</label>
+            <input type="number" className="w-full p-3 border rounded-xl" placeholder="Mins" value={task.minutes || ''} onChange={(e) => handleTimeInput(index, 'minutes', e.target.value)} /></div>
+            <div><label className="block text-xs font-bold text-black mb-1">STATUS</label>
+            <select className="w-full p-3 border rounded-xl" onChange={(e) => handleTaskChange(index, 'status', e.target.value)}><option>Pending</option><option>Completed</option></select></div>
+            <div><label className="block text-xs font-bold text-black mb-1">PRIORITY</label>
+            <select className="w-full p-3 border rounded-xl" onChange={(e) => handleTaskChange(index, 'priority', e.target.value)}><option>Normal</option><option>High</option></select></div>
           </div>
           
+          <label className="block text-xs font-bold text-black mb-1">DESCRIPTION</label>
           <textarea className="w-full p-3 border rounded-xl h-20" placeholder="Description..." onChange={(e) => handleTaskChange(index, 'description', e.target.value)} />
         </div>
       ))}
 
       <div className="flex gap-2">
-        <button onClick={addNewTaskBlock} className="bg-green-600 text-white px-4 py-3 rounded-xl font-bold flex-1 md:flex-none">+ Add Task</button>
-        <button onClick={submitAllTasks} className="bg-violet-900 text-white px-6 py-3 rounded-xl font-bold flex-1 md:flex-none">Submit All</button>
+        {/* <button type="button" onClick={handleAddClick} className="bg-green-600 text-white px-4 py-3 rounded-xl font-bold flex-1 md:flex-none">+ Add Task</button> */}
+        <button type="button" onClick={submitAllTasks} className="bg-violet-900 text-white px-6 py-3 rounded-xl font-bold flex-1 md:flex-none">Submit All</button>
       </div>
     </div>
   );
