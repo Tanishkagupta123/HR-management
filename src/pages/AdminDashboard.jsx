@@ -84,7 +84,7 @@ setHiringList(hRes.data);
     { name: 'Attendance', path: '/admin/attendance' },
     { name: 'Leave Management', path: '/admin/leave-management' },
     // { name: 'Payroll Management', path: '/admin/payroll-management' },
-    { name: 'Payroll Management 1', path: '/admin/payroll-management1' },
+    { name: 'Payroll Management ', path: '/admin/payroll-management1' },
     { name: 'Payslip Generation', path: '/admin/payslip-generation' },
     // { name: 'PF / ESI / Tax Management', path: '/admin/pf-esi-tax-management' },
     { name: 'Performance Management', path: '/admin/performance-management' },

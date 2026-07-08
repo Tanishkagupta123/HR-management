@@ -3,7 +3,7 @@ import axios from "axios";
 
 export default function PayrollManagement1() {
   const [form, setForm] = useState({
-    employee: "", basicSalary: "", houseRent: "", medical: "", 
+    employee: "", email: "", basicSalary: "", houseRent: "", medical: "", 
     travel: "", overtime: "", bonus: "", leaveDeduction: "", otherDeduction: "",
   });
   
@@ -48,7 +48,16 @@ export default function PayrollManagement1() {
   useEffect(() => { fetchData(); }, []);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Jab employee select ho toh email automatically fill karo
+    if (name === 'employee') {
+      const selectedEmployee = employees.find(emp => emp.name === value);
+      if (selectedEmployee) {
+        setForm(prev => ({ ...prev, email: selectedEmployee.email || '' }));
+      }
+    }
   };
 
   const handleSave = async () => {
@@ -58,7 +67,7 @@ export default function PayrollManagement1() {
         ...form, gross: totalGrossForDisplay, net: netSalary, pf: pf, esi: esi, tax: profTax
       });
       alert("Payroll Saved Successfully!");
-      setForm({ employee: "", basicSalary: "", houseRent: "", medical: "", travel: "", overtime: "", bonus: "", leaveDeduction: "", otherDeduction: "" });
+      setForm({ employee: "", email: "", basicSalary: "", houseRent: "", medical: "", travel: "", overtime: "", bonus: "", leaveDeduction: "", otherDeduction: "" });
       fetchData();
     } catch (err) { alert("Error saving payroll."); }
   };
@@ -87,6 +96,10 @@ export default function PayrollManagement1() {
                   {employees.map((emp, i) => <option key={i} value={emp.name}>{emp.name}</option>)}
                 </select>
               </div>
+              <div>
+                <label className="font-medium">Employee Email</label>
+                <input type="text" value={form.email} readOnly className="w-full mt-2 border rounded-xl p-3 bg-slate-100 cursor-not-allowed" placeholder="Select employee to see email"/>
+              </div>
               <div><label className="font-medium">Basic Salary</label><input type="number" name="basicSalary" value={form.basicSalary} onChange={handleChange} className="w-full mt-2 border rounded-xl p-3"/></div>
               <div><label className="font-medium">House Rent</label><input type="number" name="houseRent" value={form.houseRent} onChange={handleChange} className="w-full mt-2 border rounded-xl p-3"/></div>
               <div><label className="font-medium">Medical</label><input type="number" name="medical" value={form.medical} onChange={handleChange} className="w-full mt-2 border rounded-xl p-3"/></div>
@@ -108,6 +121,7 @@ export default function PayrollManagement1() {
             <thead>
               <tr className="border-b text-slate-500">
                 <th className="p-3">Employee</th>
+                <th className="p-3">Email</th>
                 <th className="p-3">Basic</th>
                 <th className="p-3">PF</th>
                 <th className="p-3">ESI</th>
@@ -121,6 +135,7 @@ export default function PayrollManagement1() {
               {payrollList.map((p, i) => (
                 <tr key={i} className="border-b hover:bg-slate-50">
                   <td className="p-3 font-bold">{p.employee_name}</td>
+                  <td className="p-3 text-sm text-slate-600">{p.email || 'N/A'}</td>
                   <td className="p-3">₹{p.basic_salary}</td>
                   <td className="p-3 text-red-600">₹{p.pf || 0}</td>
                   <td className="p-3 text-red-600">₹{p.esi || 0}</td>

@@ -29,7 +29,7 @@ export default function PayslipGeneration() {
     setSelectedEmp(emp);
   };
 
-  // PDF Generation Logic - FIXED
+  // PDF Generation - ONLY Download (No Email)
   const handleDownload = (emp) => {
     const doc = new jsPDF();
     doc.setFontSize(20);
@@ -37,7 +37,6 @@ export default function PayslipGeneration() {
     doc.setFontSize(12);
     doc.text(`Employee: ${emp.employee_name}`, 14, 30);
     
-    // autoTable(doc, { ... }) ka sahi syntax
     autoTable(doc, {
       startY: 35,
       head: [['Description', 'Amount (₹)']],
@@ -66,6 +65,7 @@ export default function PayslipGeneration() {
       await axios.post('http://localhost:8000/payslip/send-mail', emp);
       alert(`Email sent successfully to ${emp.employee_name}`);
     } catch (err) {
+      console.error(err);
       alert("Failed to send email.");
     }
   };
@@ -124,9 +124,9 @@ export default function PayslipGeneration() {
                     </span>
                   </td>
                   <td className="p-5 flex justify-center gap-3">
-                    <button onClick={() => handleView(emp)} className="p-2 hover:bg-slate-200 rounded-lg text-slate-600"><FileText size={18} /></button>
-                    <button onClick={() => handleDownload(emp)} className="p-2 hover:bg-slate-200 rounded-lg text-slate-600"><Download size={18} /></button>
-                    <button onClick={() => handleMail(emp)} className="p-2 hover:bg-slate-200 rounded-lg text-slate-600"><Mail size={18} /></button>
+                    <button onClick={() => handleView(emp)} className="p-2 hover:bg-slate-200 rounded-lg text-slate-600" title="View"><FileText size={18} /></button>
+                    <button onClick={() => handleDownload(emp)} className="p-2 hover:bg-slate-200 rounded-lg text-slate-600" title="Download PDF"><Download size={18} /></button>
+                    <button onClick={() => handleMail(emp)} className="p-2 hover:bg-slate-200 rounded-lg text-slate-600" title="Send Email"><Mail size={18} /></button>
                   </td>
                 </tr>
               ))
