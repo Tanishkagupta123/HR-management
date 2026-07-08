@@ -94,9 +94,7 @@ export default function TeamCollaboration() {
       ) : (
         <div className="bg-white rounded-3xl shadow-sm border p-8 max-w-6xl mx-auto">
             <h1 className="text-4xl font-extrabold text-violet-950 mb-3">Team Collaboration</h1>
-            {/* Yahan baaki ka UI aapke original code jaisa hi rahega */}
-            {/* Conflict hat chuke hain, ab aap yahan content add kar sakti hain */}
-        </div>
+              </div>
       )}
     </div>
   );
